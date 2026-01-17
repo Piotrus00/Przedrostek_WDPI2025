@@ -32,7 +32,7 @@ function loadCards(cards) {
 }
 
 function createCard(card) {
-    //const template = document.querySelector("#card-template");
+    const template = document.querySelector("#card-template");
 
     const clone = template.content.cloneNode(true);
     const div = clone.querySelector("div");

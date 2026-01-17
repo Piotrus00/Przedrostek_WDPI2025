@@ -1,23 +1,64 @@
 <?php
+
 require_once 'src/controllers/SecurityController.php';
+require_once 'src/controllers/DashboardController.php';
+require_once 'src/middleware/checkRequestAllowed.php';
+require_once 'src/middleware/checkAuthRequirements.php';
+class Routing
+{
+    public static $routes = [
+        'login' => [
+            'controller' => 'SecurityController',
+            'action' => 'login'
+        ],
+        'register' => [
+            'controller' => 'SecurityController',
+            'action' => 'register'
+        ],
+        'dashboard' => [
+            'controller' => 'DashboardController',
+            'action' => 'index'
+        ],
+        'search-cards' => [
+            'controller' => 'DashboardController',
+            'action' => 'search'
+        ],
+        'logout' => [
+            'controller' => 'SecurityController',
+            'action' => 'logout'
+        ],
+    ];
+    private static $instances = [];
+    public static function run(string $path)
+    {
+        if (array_key_exists($path, self::$routes)) {
+            $controllerName = self::$routes[$path]['controller'];
+            $action = self::$routes[$path]['action'];
 
+            $object = self::getControllerInstance($controllerName);
 
-class Routing {
+            checkRequestAllowed($object, $action);
+            checkAuthRequirements($object, $action);
 
-    public static function run(string $path) {
-        //TODO na podstawie sciezki sprawdzamy jaki HTML zwrocic
-        switch ($path) {
-    case 'dashboard':
-        include 'public/views/dashboard.html';
-        break;
-    case 'login':
-        $controller = new SecurityController();
-        $controller->login();
-        // include 'public/views/login.html';
-        break;
-    default:
+            $object->$action();
+            return;
+        }
+        if (preg_match('#^card-details/([0-9]+)$#', $path, $matches)) {
+
+            $id = $matches[1];
+
+            $object = self::getControllerInstance('DashboardController');
+
+            $object->details($id);
+
+            return;
+        }
         include 'public/views/404.html';
-        break;
-        } 
+    }
+    private static function getControllerInstance($controllerName) {
+        if (!isset(self::$instances[$controllerName])) {
+            self::$instances[$controllerName] = new $controllerName();
+        }
+        return self::$instances[$controllerName];
     }
 }

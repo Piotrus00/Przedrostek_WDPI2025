@@ -17,3 +17,13 @@ VALUES (
            'Lubi programować w JS i PL/SQL.',
            TRUE
        );
+INSERT INTO users (firstname, lastname, email, password, bio, enabled)
+VALUES (
+    'Test',
+    'User',
+    'test.user@example.com',
+    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36E8Fz8D2N9b8KZ9jF1e0yC',
+    'Użytkownik testowy do logowania.',
+    TRUE
+);
+

@@ -23,6 +23,22 @@ class Routing
             'controller' => 'DashboardController',
             'action' => 'search'
         ],
+        'roulette.html' => [
+            'controller' => 'DashboardController',
+            'action' => 'roulette'
+        ],
+        'statistics.html' => [
+            'controller' => 'DashboardController',
+            'action' => 'statistics'
+        ],
+        'upgrades.html' => [
+            'controller' => 'DashboardController',
+            'action' => 'upgrades'
+        ],
+        'admin-panel' => [
+            'controller' => 'DashboardController',
+            'action' => 'adminPanel'
+        ],
         'logout' => [
             'controller' => 'SecurityController',
             'action' => 'logout'

@@ -2,6 +2,10 @@
 
 require_once 'src/controllers/SecurityController.php';
 require_once 'src/controllers/DashboardController.php';
+require_once 'src/controllers/RouletteController.php';
+require_once 'src/controllers/StatisticsController.php';
+require_once 'src/controllers/UpgradesController.php';
+require_once 'src/controllers/AdminPanelController.php';
 require_once 'src/middleware/checkRequestAllowed.php';
 require_once 'src/middleware/checkAuthRequirements.php';
 class Routing
@@ -22,6 +26,22 @@ class Routing
         'search-cards' => [
             'controller' => 'DashboardController',
             'action' => 'search'
+        ],
+        'roulette' => [
+            'controller' => 'RouletteController',
+            'action' => 'index'
+        ],
+        'statistics' => [
+            'controller' => 'StatisticsController',
+            'action' => 'index'
+        ],
+        'upgrades' => [
+            'controller' => 'UpgradesController',
+            'action' => 'index'
+        ],
+        'admin-panel' => [
+            'controller' => 'AdminPanelController',
+            'action' => 'index'
         ],
         'logout' => [
             'controller' => 'SecurityController',

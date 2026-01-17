@@ -18,11 +18,11 @@ class UserRepository extends Repository
         return $users;
     }
 
-    public function createUser(string $email, string $hashedPassword, string $firstName, string $lastName ): void{
+    public function createUser(string $email, string $hashedPassword, string $firstName, string $lastName, string $role = 'user' ): void{
         $stmt = $this->database->connect()->prepare('
-        INSERT INTO users (email, password, firstname, lastname) VALUES (?,?,?,?);
+        INSERT INTO users (email, password, firstname, lastname, role) VALUES (?,?,?,?,?);
         ');
-        $stmt->execute([$email, $hashedPassword, $firstName, $lastName]);
+        $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $role]);
     }
 
     public function getUserByEmail(string $email) {

@@ -1,26 +1,32 @@
 <?php
 
 require_once "config.php";
+require_once __DIR__ . "/src/patterns/Singleton.php";
 
-//TODO Singleton
-class Database {
+class Database extends Singleton {
     private $username;
     private $password;
     private $host;
     private $database;
+    private $connection;
 
-    public function __construct()
+    protected function __construct()
     {
         $this->username = USERNAME;
         $this->password = PASSWORD;
         $this->host = HOST;
         $this->database = DATABASE;
+        $this->connection = null;
     }
 
     public function connect()
     {
+        if ($this->connection instanceof PDO) {
+            return $this->connection;
+        }
+
         try {
-            $conn = new PDO(
+            $this->connection = new PDO(
                 "pgsql:host=$this->host;port=5432;dbname=$this->database",
                 $this->username,
                 $this->password,
@@ -28,13 +34,16 @@ class Database {
             );
 
             // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $conn;
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $this->connection;
         }
         catch(PDOException $e) {
             die("Connection failed: " . $e->getMessage());
         }
     }
 
-    //TODO disconnect method
+    public function disconnect(): void
+    {
+        $this->connection = null;
+    }
 }

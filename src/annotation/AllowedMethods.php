@@ -1,5 +1,5 @@
 <?php
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::TARGET_METHOD)] // post,get,put,delete...
 class AllowedMethods {
     public array $methods;
 

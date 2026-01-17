@@ -8,8 +8,8 @@
     <link rel="stylesheet" type="text/css" href="public/styles/login.css">
 </head>
 <body>
-<form action="\login" method="POST">
-    <h1 id="title">LOGIN</h1>
+<form action="\register" method="POST">
+    <h1 id="title">REGISTER AS NEW USER</h1>
     <?php if(isset($messages)):?>
     <?php foreach($messages as $message): ?>
     <p class="message">
@@ -18,8 +18,14 @@
     <?php endforeach; ?>
     <?php endif;?>
     <input name="email" type="email" placeholder="Podaj email">
-    <input name="password" type="password" placeholder="Podaj hasło">
-    <button type="submit">LOGIN</button>
+    <input name="password1" type="password" placeholder="Podaj hasło">
+    <input name="password2" type="password" placeholder="Powrtórz hasło">
+
+
+    <input name="firstname" type="text" placeholder="Podaj imie">
+    <input name="lastname" type="text" placeholder="Podaj nazwisko">
+
+    <button type="submit">REGISTER</button>
 </form>
 </body>
 </html>

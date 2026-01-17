@@ -1,23 +1,32 @@
 <?php
+require_once 'src/patterns/Singleton.php';
+class AppController extends Singleton
+{
 
+    protected function isGet(): bool
+    {
+        return $_SERVER["REQUEST_METHOD"] === 'GET';
+    }
 
-class AppController {
+    protected function isPost(): bool
+    {
+        return $_SERVER["REQUEST_METHOD"] === 'POST';
+    }
 
     protected function render(string $template = null, array $variables = [])
     {
-        $templatePath = 'public/views/'. $template.'.html';
-        $templatePath404 = 'public/views/404.html';
-        $output = "";
-                 
-        if(file_exists($templatePath)){
+        $templatePath = 'public/views/' . $template . '.html';
+        $output = 'public/views/404.html';
+
+        if (file_exists($templatePath)) {
             extract($variables);
-            
+
             ob_start();
             include $templatePath;
             $output = ob_get_clean();
-        } else {
+        } else{
             ob_start();
-            include $templatePath404;
+            include $templatePath;
             $output = ob_get_clean();
         }
         echo $output;

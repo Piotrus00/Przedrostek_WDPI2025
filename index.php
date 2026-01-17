@@ -20,6 +20,11 @@ catch (\Exception $e) {
         var_dump($e->getMessage());
         exit;
     }
+    if ($e->getCode() === 403) {
+        http_response_code(403);
+        include 'public/views/403.html';
+        exit;
+    }
 
     http_response_code(500);
     echo "Wystąpił błąd serwera.";

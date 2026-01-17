@@ -9,7 +9,7 @@ class AdminPanelController extends AppController
         parent::__construct();
     }
 
-    #[RequireLogin]
+    #[RequireLogin([RequireLogin::ROLE_ADMIN])]
     public function index(): void
     {
         $this->render('admin-panel');

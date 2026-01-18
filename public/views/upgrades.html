@@ -1,13 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upgrades</title>
-</head>
-<body>
-    <h1>Upgrades</h1>
-    <p>Przykładowa strona ulepszeń.</p>
-    <a href="/dashboard">Powrót do dashboardu</a>
-</body>
-</html>
+<?php
+$extraStyles = [
+  "/public/styles/upgrades.css",
+];
+
+$extraScripts = [
+  "/public/scripts/upgrades.js",
+];
+
+include __DIR__ . '/../includes/header.html';
+?>
+
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <h1 class="page-title">Upgrades</h1>
+    <p class="balance">Balance: $<span id="userBalance">500</span></p>
+  </header>
+
+  <!-- Upgrades Grid -->
+  <div class="upgrades-grid" id="upgradesGrid">
+    <!-- Upgrades will be injected by JS -->
+  </div>
+
+  <!-- Info Text -->
+  <div class="info-text">
+    <p>Click on an upgrade to purchase the next level</p>
+    <p>Green indicators show purchased levels</p>
+  </div>
+</div>
+
+<?php include __DIR__ . '/../includes/footer.html'; ?>

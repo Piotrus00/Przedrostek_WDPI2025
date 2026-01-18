@@ -1,13 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roulette</title>
-</head>
-<body>
-    <h1>Roulette</h1>
-    <p>Przykładowa strona roulette.</p>
-    <a href="/dashboard">Powrót do dashboardu</a>
-</body>
-</html>
+<?php
+require_once __DIR__ . '/../../src/Services/RouletteGameService.php';
+
+$rouletteNumbers = RouletteGameService::getRouletteNumbers();
+$redNumbers = RouletteGameService::getRedNumbers();
+$chipValues = [1, 2, 5, 10, 25, 50, 100, 500, 1000];
+
+$extraStyles = [
+    "/public/styles/roulette.css",
+];
+
+$extraScripts = [
+    "/public/scripts/roulette.js",
+];
+
+include __DIR__ . '/../includes/header.html'; ?>
+
+<div class="content-area roulette-page">
+    <div class="roulette-app">
+        <div class="roulette-container">
+            <div class="horizontal-wheel-container">
+                <div class="wheel-pointer"></div>
+                <div class="horizontal-wheel-track">
+                    <div class="horizontal-wheel" id="rouletteWheel"
+                        data-roulette='<?php echo htmlspecialchars(json_encode($rouletteNumbers), ENT_QUOTES, "UTF-8"); ?>'
+                        data-red='<?php echo htmlspecialchars(json_encode($redNumbers), ENT_QUOTES, "UTF-8"); ?>'>
+                        <?php for ($r = 0; $r < 3; $r++): ?>
+                            <?php foreach ($rouletteNumbers as $item): ?>
+                                <div class="wheel-number <?php echo $item['color']; ?>"><?php echo $item['num']; ?></div>
+                            <?php endforeach; ?>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-numbers" id="recentNumbers"></div>
+            <div class="betting-controls">
+                <div class="bet-input-row">
+                    <input
+                        type="number"
+                        class="bet-input"
+                        id="currentBetInput"
+                        placeholder="Bet amount..."
+                        value=""
+                        readonly
+                    />
+                    <button class="clear-btn" id="clearBetsBtn" disabled>Clear</button>
+                </div>
+
+                <div class="chip-buttons">
+                    <?php foreach ($chipValues as $chip): ?>
+                        <button class="chip-btn" data-chip="<?php echo $chip; ?>">+<?php echo $chip; ?></button>
+                    <?php endforeach; ?>
+
+                </div>
+            </div>
+
+            <div class="range-bets">
+                <div class="range-box red" data-bet="red" data-multiplier="x2">
+                    <div class="range-label">RED</div>
+                    <div class="range-total">x2</div>
+                    <div class="bet-chip"></div>
+                </div>
+
+                <div class="range-box green" data-bet="0" data-multiplier="x36">
+                    <div class="range-label">0</div>
+                    <div class="range-total">x36</div>
+                    <div class="bet-chip"></div>
+                </div>
+
+                <div class="range-box black" data-bet="black" data-multiplier="x2">
+                    <div class="range-label">BLACK</div>
+                    <div class="range-total">x2</div>
+                    <div class="bet-chip"></div>
+                </div>
+            </div>
+
+            <div class="betting-table">
+                <div class="bet-cell zero" data-bet="0">
+                    <span>0</span>
+                    <div class="chip"></div>
+                </div>
+                <div class="number-grid" id="numberGrid">
+                    <?php for ($col = 0; $col < 12; $col++): ?>
+                        <div class="grid-column">
+                            <?php foreach ([3, 2, 1] as $row):
+                                $num = $col * 3 + $row;
+                                $isRed = in_array($num, $redNumbers, true);
+                            ?>
+                                <div class="bet-cell number <?php echo $isRed ? 'red' : 'black'; ?>" data-bet="<?php echo $num; ?>">
+                                    <span><?php echo $num; ?></span>
+                                    <div class="chip"></div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+
+            <div class="roulette-status">
+                <div class="status-label">Winning number:</div>
+                <div class="status-value" id="winningNumber">-</div>
+            </div>
+
+            <div class="roulette-status">
+                <div class="status-label">Wygrano:</div>
+                <div class="status-value" id="winningsDisplay">+$0</div>
+            </div>
+
+            <button class="spin-btn" id="spinBtn" disabled>Spin</button>
+        </div>
+    </div>
+</div>
+
+<?php include __DIR__ . '/../includes/footer.html'; ?>

@@ -1,0 +1,182 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  color: white;
+  min-height: 100vh;
+}
+
+/* Header */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 2px;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+}
+
+/* Mobile Menu */
+
+.mobile-menu {
+  position: absolute;
+  top: 70px;
+  right: 24px;
+  background: #1a0707;
+  border: 1px solid #4b1f1f;
+  border-radius: 8px;
+  display: none;
+  flex-direction: column;
+}
+
+.mobile-menu.open {
+  display: flex;
+}
+
+.mobile-menu a {
+  padding: 12px 16px;
+  color: white;
+  text-decoration: none;
+}
+
+.mobile-menu a:hover {
+  background: rgba(211, 107, 107, 0.15);
+}
+
+/* Main Content */
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 3rem;
+  margin: 24px 0 28px;
+}
+
+/* Stats Box */
+
+.stats-box {
+  position: relative;
+  border: 2px solid #4b1f1f;
+  border-radius: 12px;
+  background: rgba(20, 6, 6, 0.6);
+  padding: 48px;
+  min-height: 500px;
+  margin-top: -12px;
+}
+
+.stats-box h3 {
+  font-size: 2rem;
+  color: #d36b6b;
+  margin-bottom: 32px;
+}
+
+/* Rows */
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+}
+
+.row span {
+  font-weight: 500;
+}
+
+.row strong {
+  font-weight: 600;
+}
+
+/* Tabs */
+
+.tabs {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  gap: 24px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 1rem;
+  cursor: pointer;
+  padding-bottom: 4px;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.tab:hover {
+  color: #d36b6b;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #d36b6b;
+  transition: width 0.3s ease;
+}
+
+.tab:hover::after {
+  width: 100%;
+}
+
+.tab.active {
+  color: #d36b6b;
+  border-bottom: 2px solid #d36b6b;
+}
+
+/* Tab Content */
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JakiesCasino</title>
+    <link rel="stylesheet" href="/public/styles/bgstyle.css">
+    <link rel="stylesheet" href="/public/styles/navstyle.css">
+
+    <?php
+    if (!empty($extraStyles) && is_array($extraStyles)) {
+        foreach ($extraStyles as $style) {
+            echo '<link rel="stylesheet" href="' . $style . '">' . "\n";
+        }
+    }
+    ?>
+
+    <!-- zeby dodac inne style to w pliku do ktorego chcemy dodac(nie tu) dodajemy freagmet ponizej -->
+    <!-- <?php 
+//  $extraStyles = [
+//    "public/styles/statistics/statcards.css",
+//    "public/styles/statistics/table.css",
+//    "public/styles/statistics/jsstyles.css"
+//   ];
+//  include 'includes/header.php'; ?> -->
+
+
+    <script src="https://kit.fontawesome.com/d673a6d6f0.js" crossorigin="anonymous" defer></script>
+    <script src="/public/scripts/nav.js" defer></script>
+</head>
+<body>
+    <div class="casino-app">
+        <?php include 'background.html'; ?>
+        <?php include 'navbar.html'; ?>
+

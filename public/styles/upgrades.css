@@ -1,0 +1,114 @@
+:root {
+  --card-bg: rgba(14, 2, 3, 0.9);
+  --card-border: #4b1f1f;
+  --card-hover: rgba(24, 6, 6, 0.9);
+  --text-color: #fff;
+  --text-muted: rgba(255,255,255,0.7);
+  --text-green: #0f7a3a;
+  --text-red: #b91c1c;
+  --accent: #d36b6b;
+  --radius: 12px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--text-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  position: relative;
+  z-index: 10;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.balance {
+  font-size: 1.5rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Upgrades Grid */
+.upgrades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Upgrade Card */
+.upgrade-card {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upgrade-card:hover {
+  background: var(--card-hover);
+  border-color: #5a2a2a;
+}
+
+.upgrade-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(10, 2, 2, 0.7);
+  border-color: #3b1515;
+}
+
+.upgrade-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.upgrade-card p.description {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.upgrade-card p.cost {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.upgrade-card .levels {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.upgrade-card .level {
+  width: 30px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--text-red);
+  transition: background 0.2s ease;
+}
+
+.upgrade-card .level.active {
+  background: var(--text-green);
+}
+
+/* Info Text */
+.info-text {
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  margin-top: 32px;
+  font-size: 0.9rem;
+}

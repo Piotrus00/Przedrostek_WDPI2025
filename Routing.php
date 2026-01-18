@@ -31,6 +31,10 @@ class Routing
             'controller' => 'RouletteController',
             'action' => 'index'
         ],
+        'api/roulette' => [
+            'controller' => 'RouletteController',
+            'action' => 'gameApi'
+        ],
         'statistics' => [
             'controller' => 'StatisticsController',
             'action' => 'index'

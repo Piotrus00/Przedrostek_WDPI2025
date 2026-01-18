@@ -1,0 +1,14 @@
+        <div class="vignette"></div>
+    </div>
+
+    <!-- analogicznie jak w header -->
+    <?php
+    if (!empty($extraScripts) && is_array($extraScripts)) {
+        foreach ($extraScripts as $script) {
+            echo '<script src="' . $script . '"></script>' . "\n";
+        }
+    }
+    ?>
+
+</body>
+</html>

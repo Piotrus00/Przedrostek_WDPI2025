@@ -1,0 +1,36 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background:
+        linear-gradient(
+            135deg,
+            #000000 0%,
+            #1a0000 35%,
+            #320000 55%,
+            #1a0000 75%,
+            #000000 100%
+        );
+    z-index: 0;
+    pointer-events: none;
+}
+
+.center-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    letter-spacing: 4px;
+    color: rgba(255, 255, 255, 0.25);
+}

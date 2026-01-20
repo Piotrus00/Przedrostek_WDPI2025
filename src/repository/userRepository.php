@@ -18,11 +18,11 @@ class UserRepository extends Repository
         return $users;
     }
 
-    public function createUser(string $email, string $hashedPassword, string $firstName, string $lastName, string $role = 'user' ): void{
+    public function createUser(string $email, string $hashedPassword, string $firstName, string $lastName, string $role = 'user', int $balance = 1000 ): void{
         $stmt = $this->database->connect()->prepare('
-        INSERT INTO users (email, password, firstname, lastname, role) VALUES (?,?,?,?,?);
+        INSERT INTO users (email, password, firstname, lastname, balance, role) VALUES (?,?,?,?,?,?);
         ');
-        $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $role]);
+        $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $balance, $role]);
     }
 
     public function getUserByEmail(string $email) {
@@ -35,5 +35,31 @@ class UserRepository extends Repository
         $users = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $users;
+    }
+
+    public function getUserBalanceById(int $userId): int
+    {
+        $stmt = $this->database->connect()->prepare('
+            SELECT balance FROM users WHERE id = :id
+        ');
+        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return 0;
+        }
+
+        return (int) $row['balance'];
+    }
+
+    public function updateUserBalance(int $userId, int $newBalance): void
+    {
+        $stmt = $this->database->connect()->prepare('
+            UPDATE users SET balance = :balance WHERE id = :id
+        ');
+        $stmt->bindParam(':balance', $newBalance, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
     }
 }

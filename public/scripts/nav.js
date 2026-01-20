@@ -1,3 +1,12 @@
+const updateBalanceDisplay = (balance) => {
+    const amount = Number(balance) || 0;
+    document.querySelectorAll('[data-balance]').forEach(el => {
+        el.textContent = `${amount}$`;
+    });
+};
+
+window.updateBalanceDisplay = updateBalanceDisplay;
+
 document.addEventListener('DOMContentLoaded', () => {
     const burger = document.querySelector('.burger');
     const navItems = document.querySelector('.nav-items');

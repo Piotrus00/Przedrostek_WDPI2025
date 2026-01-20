@@ -1,24 +1,16 @@
-const upgrades = [
-  { id: '1', title: 'Additional 7', description: '2x 7 chances', baseCost: 20, maxLevel: 5, currentLevel: 0 },
-  { id: '2', title: 'Black Multiplier', description: '+0.2x multiplier', baseCost: 100, maxLevel: 5, currentLevel: 0 },
-  { id: '3', title: 'Red Multiplier', description: '+0.2x multiplier', baseCost: 100, maxLevel: 5, currentLevel: 0 },
-  { id: '4', title: 'Green Multiplier', description: '2x multiplier', baseCost: 100, maxLevel: 5, currentLevel: 0 },
-  { id: '5', title: 'Lucky Green', description: '2x green chance', baseCost: 75, maxLevel: 4, currentLevel: 0 },
-  { id: '6', title: 'Refund', description: '1% refund chance', baseCost: 250, maxLevel: 5, currentLevel: 0 },
-  { id: '7', title: 'More Money', description: '+0.1x more money', baseCost: 500, maxLevel: 10, currentLevel: 0 },
-];
-
+let upgrades = [];
 let userBalance = 0;
 
 const balanceEl = document.getElementById('userBalance');
 const upgradesGrid = document.getElementById('upgradesGrid');
 
-async function fetchBalance() {
+async function fetchUpgrades() {
   try {
-    const response = await fetch('/api/balance');
+    const response = await fetch('/api/upgrades');
     const data = await response.json();
     if (data && data.success) {
       userBalance = Number(data.balance) || 0;
+      upgrades = Array.isArray(data.upgrades) ? data.upgrades : [];
       balanceEl.textContent = userBalance;
       if (window.updateBalanceDisplay) {
         window.updateBalanceDisplay(userBalance);
@@ -29,16 +21,17 @@ async function fetchBalance() {
   }
 }
 
-async function updateBalance(delta) {
+async function purchaseUpgrade(id) {
   try {
-    const response = await fetch('/api/balance', {
+    const response = await fetch('/api/upgrades', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ delta })
+      body: JSON.stringify({ id })
     });
     const data = await response.json();
     if (data && data.success) {
       userBalance = Number(data.balance) || 0;
+      upgrades = Array.isArray(data.upgrades) ? data.upgrades : upgrades;
       balanceEl.textContent = userBalance;
       if (window.updateBalanceDisplay) {
         window.updateBalanceDisplay(userBalance);
@@ -74,9 +67,8 @@ function renderUpgrades() {
 
     card.addEventListener('click', async () => {
       if (!canAfford || isMaxed) return;
-      const updated = await updateBalance(-nextCost);
+      const updated = await purchaseUpgrade(upgrade.id);
       if (!updated) return;
-      upgrade.currentLevel += 1;
       renderUpgrades();
     });
 
@@ -84,4 +76,4 @@ function renderUpgrades() {
   });
 }
 
-fetchBalance().then(renderUpgrades);
+fetchUpgrades().then(renderUpgrades);

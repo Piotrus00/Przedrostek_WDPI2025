@@ -40,6 +40,10 @@ class Routing
             'controller' => 'BalanceController',
             'action' => 'balanceApi'
         ],
+        'api/upgrades' => [
+            'controller' => 'UpgradesController',
+            'action' => 'upgradesApi'
+        ],
         'statistics' => [
             'controller' => 'StatisticsController',
             'action' => 'index'

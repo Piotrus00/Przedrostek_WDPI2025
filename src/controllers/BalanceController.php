@@ -15,7 +15,7 @@ class BalanceController extends AppController
         $this->userRepository = new UserRepository();
     }
 
-    #[AllowedMethods(['GET', 'POST'])]
+    #[AllowedMethods(['GET'])]
     #[RequireLogin]
     public function balanceApi(): void
     {
@@ -28,49 +28,12 @@ class BalanceController extends AppController
             return;
         }
 
-        if ($this->isGet()) {
-            $balance = isset($_SESSION['user_balance'])
-                ? (int) $_SESSION['user_balance']
-                : $this->userRepository->getUserBalanceById((int) $userId);
-
-            $_SESSION['user_balance'] = $balance;
-
-            echo json_encode(['success' => true, 'balance' => $balance]);
-            return;
-        }
-
-        $rawInput = file_get_contents('php://input');
-        $input = json_decode($rawInput, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Invalid JSON input']);
-            return;
-        }
-
-        $currentBalance = isset($_SESSION['user_balance'])
+        $balance = isset($_SESSION['user_balance'])
             ? (int) $_SESSION['user_balance']
             : $this->userRepository->getUserBalanceById((int) $userId);
 
-        if (isset($input['delta'])) {
-            $delta = (int) $input['delta'];
-            $newBalance = $currentBalance + $delta;
-        } elseif (isset($input['balance'])) {
-            $newBalance = (int) $input['balance'];
-        } else {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Missing delta or balance']);
-            return;
-        }
+        $_SESSION['user_balance'] = $balance;
 
-        if ($newBalance < 0) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Insufficient balance']);
-            return;
-        }
-
-        $this->userRepository->updateUserBalance((int) $userId, $newBalance);
-        $_SESSION['user_balance'] = $newBalance;
-
-        echo json_encode(['success' => true, 'balance' => $newBalance]);
+        echo json_encode(['success' => true, 'balance' => $balance]);
     }
 }

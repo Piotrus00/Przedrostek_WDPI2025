@@ -6,6 +6,8 @@ const initRoulette = () => {
 	let isSpinning = false;
 	let recentNumbers = [];
 	let userBalance = 0;
+	let pendingBalance = null;
+	let pendingPayout = null;
 
     //stale elementy DOM
 	const wheelEl = document.getElementById('rouletteWheel');
@@ -162,6 +164,8 @@ const initRoulette = () => {
 
 		let result;
 		let randomIndex;
+		pendingBalance = null;
+		pendingPayout = null;
 
         //wysylamy zapytanie do serwera o wynik
 		try {
@@ -179,13 +183,10 @@ const initRoulette = () => {
 			result = data.result;
 			randomIndex = rouletteNumbers.findIndex(item => item.num === result.num); //znajdujemy index wylosowanej liczby
 			if (typeof data.balance !== 'undefined') {
-				userBalance = Number(data.balance) || 0;
-				if (window.updateBalanceDisplay) {
-					window.updateBalanceDisplay(userBalance);
-				}
+				pendingBalance = Number(data.balance) || 0;
 			}
 			if (typeof data.payout !== 'undefined') {
-				winningsDisplayEl.textContent = `+$${data.payout}`;
+				pendingPayout = Number(data.payout) || 0;
 			}
 		} catch (error) {
 			isSpinning = false;
@@ -221,6 +222,15 @@ const initRoulette = () => {
 			setTimeout(() => {
 				recentNumbers = [result.num, ...recentNumbers].slice(0, 10);
 				winningNumberEl.textContent = result.num.toString();
+				if (pendingPayout !== null) {
+					winningsDisplayEl.textContent = `+$${pendingPayout}`;
+				}
+				if (pendingBalance !== null) {
+					userBalance = pendingBalance;
+					if (window.updateBalanceDisplay) {
+						window.updateBalanceDisplay(userBalance);
+					}
+				}
 				renderRecentNumbers(); //aktualizujemy historie ostatnich liczb
 				isSpinning = false;
 				updateControlsUI(); //odblokowujemy przyciski

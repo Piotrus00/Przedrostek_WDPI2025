@@ -9,6 +9,10 @@ html, body {
     height: 100%;
 }
 
+body {
+    font-family: system-ui, sans-serif;
+}
+
 .background {
     position: fixed;
     top: 0;

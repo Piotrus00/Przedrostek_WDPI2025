@@ -14,7 +14,7 @@ include __DIR__ . '/../includes/header.html';
   <!-- Header -->
   <header class="header">
     <h1 class="page-title">Upgrades</h1>
-    <p class="balance">Balance: $<span id="userBalance">500</span></p>
+    <p class="upgrades-balance">Balance: $<span id="userBalance"><?php echo isset($_SESSION['user_balance']) ? (int) $_SESSION['user_balance'] : 0; ?></span></p>
   </header>
 
   <!-- Upgrades Grid -->

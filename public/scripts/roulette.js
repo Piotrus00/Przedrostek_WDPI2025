@@ -5,6 +5,7 @@ const initRoulette = () => {
 	let selectedChip = 10;
 	let isSpinning = false;
 	let recentNumbers = [];
+	let userBalance = 0;
 
     //stale elementy DOM
 	const wheelEl = document.getElementById('rouletteWheel');
@@ -37,7 +38,7 @@ const initRoulette = () => {
 	const updateControlsUI = () => {
 		currentBetInputEl.value = currentBet > 0 ? currentBet.toString() : '';
 		clearBetsBtn.disabled = isSpinning || currentBet === 0;
-		spinBtn.disabled = isSpinning || currentBet === 0;
+		spinBtn.disabled = isSpinning || currentBet === 0 || currentBet > userBalance;
 
 		updateSelectedChipUI();
 	};
@@ -134,8 +135,25 @@ const initRoulette = () => {
 		updateBetChips();
 	};
 
+	const fetchBalance = async () => {
+		try {
+			const response = await fetch('/api/balance');
+			const data = await response.json();
+			if (data && data.success) {
+				userBalance = Number(data.balance) || 0;
+				if (window.updateBalanceDisplay) {
+					window.updateBalanceDisplay(userBalance);
+				}
+				updateControlsUI();
+			}
+		} catch (error) {
+			// ignore
+		}
+	};
+
 	const spinWheel = async () => {
 		if (isSpinning || currentBet === 0) return; //blokady
+		if (currentBet > userBalance) return;
 
 		isSpinning = true;
 		winningNumberEl.textContent = '-'; //resetujemy wyswietlanie wygranej liczby
@@ -150,7 +168,7 @@ const initRoulette = () => {
 			const response = await fetch('/api/roulette', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'spin' })
+				body: JSON.stringify({ action: 'spin', bets })
 			});
 
 			const data = await response.json();
@@ -160,6 +178,15 @@ const initRoulette = () => {
 
 			result = data.result;
 			randomIndex = rouletteNumbers.findIndex(item => item.num === result.num); //znajdujemy index wylosowanej liczby
+			if (typeof data.balance !== 'undefined') {
+				userBalance = Number(data.balance) || 0;
+				if (window.updateBalanceDisplay) {
+					window.updateBalanceDisplay(userBalance);
+				}
+			}
+			if (typeof data.payout !== 'undefined') {
+				winningsDisplayEl.textContent = `+$${data.payout}`;
+			}
 		} catch (error) {
 			isSpinning = false;
 			updateControlsUI();
@@ -194,7 +221,6 @@ const initRoulette = () => {
 			setTimeout(() => {
 				recentNumbers = [result.num, ...recentNumbers].slice(0, 10);
 				winningNumberEl.textContent = result.num.toString();
-				winningsDisplayEl.textContent = '--';
 				renderRecentNumbers(); //aktualizujemy historie ostatnich liczb
 				isSpinning = false;
 				updateControlsUI(); //odblokowujemy przyciski
@@ -231,6 +257,7 @@ const initRoulette = () => {
 	updateControlsUI(); //aktualizujemy UI
 	updateSelectedChipUI(); //aktualizujemy UI wybranego przycisku
 	updateBetChips(); //aktualizujemy zaklady w UI
+	fetchBalance();
 };
 
 //inicjalizacja gry po zaladowaniu DOM

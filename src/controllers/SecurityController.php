@@ -38,6 +38,7 @@ class SecurityController extends AppController {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_role'] = $user['role'] ?? 'user';
+        $_SESSION['user_balance'] = isset($user['balance']) ? (int) $user['balance'] : 0;
 
         $url = "http://$_SERVER[HTTP_HOST]";
         header("Location: {$url}/dashboard");
@@ -71,11 +72,15 @@ class SecurityController extends AppController {
 
         $hashedPassword = password_hash($password1, PASSWORD_BCRYPT);
 
+        $initialBalance = 1000;
+
         $this->userRepository->createUser(
             $email,
             $hashedPassword,
             $firstname,
-            $lastname
+            $lastname,
+            'user',
+            $initialBalance
         );
 
         return $this->render("login", ["message" => "Zarejestrowano uytkownika ".$email]);

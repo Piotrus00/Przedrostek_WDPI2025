@@ -6,6 +6,7 @@ require_once 'src/controllers/RouletteController.php';
 require_once 'src/controllers/StatisticsController.php';
 require_once 'src/controllers/UpgradesController.php';
 require_once 'src/controllers/AdminPanelController.php';
+require_once 'src/controllers/BalanceController.php';
 require_once 'src/middleware/checkRequestAllowed.php';
 require_once 'src/middleware/checkAuthRequirements.php';
 class Routing
@@ -34,6 +35,14 @@ class Routing
         'api/roulette' => [
             'controller' => 'RouletteController',
             'action' => 'gameApi'
+        ],
+        'api/balance' => [
+            'controller' => 'BalanceController',
+            'action' => 'balanceApi'
+        ],
+        'api/upgrades' => [
+            'controller' => 'UpgradesController',
+            'action' => 'upgradesApi'
         ],
         'statistics' => [
             'controller' => 'StatisticsController',

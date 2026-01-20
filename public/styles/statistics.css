@@ -10,41 +10,6 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 2px;
-}
-
-.menu-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 32px;
-  cursor: pointer;
-}
-
 /* Mobile Menu */
 
 .mobile-menu {

@@ -26,12 +26,16 @@
         </button>
         <div class="balance mobile-balance">
             <span class="balance-label">Balance:</span>
-            <span class="balance-amount">10$</span>
+            <span class="balance-amount" data-balance>
+                <?php echo isset($_SESSION['user_balance']) ? (int) $_SESSION['user_balance'] : 0; ?>$
+            </span>
         </div>
     </div>
     
     <div class="balance desktop-balance">
         <span class="balance-label">Balance:</span>
-        <span class="balance-amount">10$</span>
+        <span class="balance-amount" data-balance>
+            <?php echo isset($_SESSION['user_balance']) ? (int) $_SESSION['user_balance'] : 0; ?>$
+        </span>
     </div>
 </nav>

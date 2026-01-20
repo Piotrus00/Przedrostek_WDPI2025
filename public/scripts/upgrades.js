@@ -1,16 +1,48 @@
-const upgrades = [
-  { id: '1', title: 'Additional 3', description: 'on max', baseCost: 30, maxLevel: 5, currentLevel: 1 },
-  { id: '2', title: 'Double Wins', description: 'x2 multiplier', baseCost: 50, maxLevel: 5, currentLevel: 0 },
-  { id: '3', title: 'Lucky Green', description: '+10% green chance', baseCost: 75, maxLevel: 4, currentLevel: 0 },
-  { id: '4', title: 'Fast Spin', description: 'reduce spin time', baseCost: 40, maxLevel: 3, currentLevel: 0 },
-  { id: '5', title: 'Bonus Rounds', description: 'unlock special mode', baseCost: 100, maxLevel: 5, currentLevel: 0 },
-  { id: '6', title: 'Auto Play', description: 'enable automation', baseCost: 60, maxLevel: 3, currentLevel: 0 }
-];
-
-let userBalance = 500;
+let upgrades = [];
+let userBalance = 0;
 
 const balanceEl = document.getElementById('userBalance');
 const upgradesGrid = document.getElementById('upgradesGrid');
+
+async function fetchUpgrades() {
+  try {
+    const response = await fetch('/api/upgrades');
+    const data = await response.json();
+    if (data && data.success) {
+      userBalance = Number(data.balance) || 0;
+      upgrades = Array.isArray(data.upgrades) ? data.upgrades : [];
+      balanceEl.textContent = userBalance;
+      if (window.updateBalanceDisplay) {
+        window.updateBalanceDisplay(userBalance);
+      }
+    }
+  } catch (error) {
+    // ignore
+  }
+}
+
+async function purchaseUpgrade(id) {
+  try {
+    const response = await fetch('/api/upgrades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await response.json();
+    if (data && data.success) {
+      userBalance = Number(data.balance) || 0;
+      upgrades = Array.isArray(data.upgrades) ? data.upgrades : upgrades;
+      balanceEl.textContent = userBalance;
+      if (window.updateBalanceDisplay) {
+        window.updateBalanceDisplay(userBalance);
+      }
+      return true;
+    }
+  } catch (error) {
+    // ignore
+  }
+  return false;
+}
 
 function renderUpgrades() {
   upgradesGrid.innerHTML = '';
@@ -33,11 +65,10 @@ function renderUpgrades() {
       </div>
     `;
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', async () => {
       if (!canAfford || isMaxed) return;
-      userBalance -= nextCost;
-      upgrade.currentLevel += 1;
-      balanceEl.textContent = userBalance;
+      const updated = await purchaseUpgrade(upgrade.id);
+      if (!updated) return;
       renderUpgrades();
     });
 
@@ -45,4 +76,4 @@ function renderUpgrades() {
   });
 }
 
-renderUpgrades();
+fetchUpgrades().then(renderUpgrades);

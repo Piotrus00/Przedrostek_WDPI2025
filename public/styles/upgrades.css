@@ -34,7 +34,7 @@ body {
   margin-bottom: 8px;
 }
 
-.balance {
+.upgrades-balance {
   font-size: 1.5rem;
   color: var(--accent);
   font-weight: 600;

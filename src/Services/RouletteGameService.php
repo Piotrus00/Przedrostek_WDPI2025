@@ -2,6 +2,12 @@
 
 class RouletteGameService
 {
+    private static function getUpgradeLevel(array $levels, string $id): int
+    {
+        return isset($levels[$id]) ? (int) $levels[$id] : 0;
+    }
+
+	# mozna pomyslec zeby to do bazy przeniesc i wtedy upgrade'y inaczej dodawac
 	public static function getRouletteNumbers(): array
 	{
 		return [
@@ -50,9 +56,24 @@ class RouletteGameService
 		return [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
 	}
 
-	public static function spin(): array
+	public static function spin(array $upgradeLevels = []): array
 	{
 		$rouletteNumbers = self::getRouletteNumbers();
+		$additionalSevenLevel = self::getUpgradeLevel($upgradeLevels, '1');
+		$luckyGreenLevel = self::getUpgradeLevel($upgradeLevels, '5');
+
+		if ($additionalSevenLevel > 0) {
+			for ($i = 0; $i < $additionalSevenLevel; $i++) {
+				$rouletteNumbers[] = ['num' => 7, 'color' => 'red'];
+			}
+		}
+
+		if ($luckyGreenLevel > 0) {
+			for ($i = 0; $i < $luckyGreenLevel; $i++) {
+				$rouletteNumbers[] = ['num' => 0, 'color' => 'green'];
+			}
+		}
+
 		$randomIndex = random_int(0, count($rouletteNumbers) - 1);
 		$result = $rouletteNumbers[$randomIndex];
 
@@ -62,7 +83,7 @@ class RouletteGameService
 		];
 	}
 
-	public static function calculateWinnings(array $bets, array $result): int
+	public static function calculateWinnings(array $bets, array $result, array $upgradeLevels = [], int $totalBet = 0): int
 	{
 		$num = $result['num'] ?? null;
 		$color = $result['color'] ?? null;
@@ -72,6 +93,9 @@ class RouletteGameService
 		}
 
 		$totalWin = 0;
+		$blackMultiplier = 2 + (0.2 * self::getUpgradeLevel($upgradeLevels, '2'));
+		$redMultiplier = 2 + (0.2 * self::getUpgradeLevel($upgradeLevels, '3'));
+		$greenMultiplierLevel = self::getUpgradeLevel($upgradeLevels, '4');
 
 		foreach ($bets as $bet) {
 			if (!is_array($bet)) {
@@ -88,7 +112,11 @@ class RouletteGameService
 			if (is_numeric($betNumber)) {
 				$betValue = (int) $betNumber;
 				if ($betValue === (int) $num) {
-					$totalWin += $amount * 36;
+					$multiplier = 36;
+					if ($betValue === 0 && $greenMultiplierLevel > 0) {
+						$multiplier = (int) round($multiplier * (1 + $greenMultiplierLevel));
+					}
+					$totalWin += $amount * $multiplier;
 				}
 				continue;
 			}
@@ -100,12 +128,12 @@ class RouletteGameService
 			switch ($betNumber) {
 				case 'red':
 					if ($color === 'red') {
-						$totalWin += $amount * 2;
+						$totalWin += (int) round($amount * $redMultiplier);
 					}
 					break;
 				case 'black':
 					if ($color === 'black') {
-						$totalWin += $amount * 2;
+						$totalWin += (int) round($amount * $blackMultiplier);
 					}
 					break;
 				case 'even':
@@ -128,6 +156,19 @@ class RouletteGameService
 						$totalWin += $amount * 2;
 					}
 					break;
+			}
+		}
+
+		$moreMoneyLevel = self::getUpgradeLevel($upgradeLevels, '7');
+		if ($moreMoneyLevel > 0 && $totalWin > 0) {
+			$totalWin = (int) round($totalWin * (1 + (0.1 * $moreMoneyLevel)));
+		}
+
+		$refundLevel = self::getUpgradeLevel($upgradeLevels, '6');
+		if ($totalWin === 0 && $refundLevel > 0 && $totalBet > 0) {
+			$refundRoll = random_int(1, 100);
+			if ($refundRoll <= $refundLevel) {
+				$totalWin = $totalBet;
 			}
 		}
 

@@ -28,3 +28,4 @@ yarn-error.log*
 Thumbs.db
 .idea/
 /.github
+/scripts

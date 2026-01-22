@@ -2,6 +2,12 @@
 
 class RouletteGameService
 {
+    private static function getUpgradeLevel(array $levels, string $id): int
+    {
+        return isset($levels[$id]) ? (int) $levels[$id] : 0;
+    }
+
+	# mozna pomyslec zeby to do bazy przeniesc i wtedy upgrade'y inaczej dodawac
 	public static function getRouletteNumbers(): array
 	{
 		return [
@@ -51,6 +57,7 @@ class RouletteGameService
 	}
 
 	public static function spin(): array
+	public static function spin(array $upgradeLevels = []): array
 	{
 		$rouletteNumbers = self::getRouletteNumbers();
 		$randomIndex = random_int(0, count($rouletteNumbers) - 1);
@@ -63,6 +70,7 @@ class RouletteGameService
 	}
 
 	public static function calculateWinnings(array $bets, array $result): int
+	public static function calculateWinnings(array $bets, array $result, array $upgradeLevels = [], int $totalBet = 0): int
 	{
 		$num = $result['num'] ?? null;
 		$color = $result['color'] ?? null;

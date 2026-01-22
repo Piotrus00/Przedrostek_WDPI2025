@@ -3,15 +3,18 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../Services/RouletteGameService.php';
 require_once __DIR__ . '/../repository/UserRepository.php';
+require_once __DIR__ . '/../repository/UpgradesRepository.php';
 
 class RouletteController extends AppController
 {
 	private UserRepository $userRepository;
+	private UpgradesRepository $upgradesRepository;
 
     public function __construct()
     {
         parent::__construct();
 		$this->userRepository = new UserRepository();
+		$this->upgradesRepository = new UpgradesRepository();
     }
 
     #[RequireLogin]
@@ -67,10 +70,11 @@ class RouletteController extends AppController
 					throw new Exception('Insufficient balance');
 				}
 
-				$spin = RouletteGameService::spin();
+				$upgradeLevels = $this->upgradesRepository->getUserUpgradeLevels((int) $userId);
+				$spin = RouletteGameService::spin($upgradeLevels);
 				$result = $spin['result'];
 				$randomIndex = $spin['index'];
-				$payout = RouletteGameService::calculateWinnings($bets, $result);
+				$payout = RouletteGameService::calculateWinnings($bets, $result, $upgradeLevels, $totalBet);
 
 				$newBalance = $currentBalance - $totalBet + $payout;
 				$this->userRepository->updateUserBalance((int) $userId, $newBalance);

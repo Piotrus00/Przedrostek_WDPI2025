@@ -18,13 +18,13 @@ include __DIR__ . '/../includes/header.html';
       <section class="tab-content active" id="general">
         <h3>General Statistics</h3>
         <div class="stats-list">
-          <div class="row"><span>Account Balance:</span><strong>$0</strong></div>
-          <div class="row"><span>Total Won/Loss:</span><strong>$0</strong></div>
-          <div class="row"><span>Losses:</span><strong>0</strong></div>
-          <div class="row"><span>Wins:</span><strong>0</strong></div>
-          <div class="row"><span>Green:</span><strong>0</strong></div>
-          <div class="row"><span>Black:</span><strong>0</strong></div>
-          <div class="row"><span>Red:</span><strong>0</strong></div>
+          <div class="row"><span>Account Balance:</span><strong id="statBalance">$0</strong></div>
+          <div class="row"><span>Total Won/Loss:</span><strong id="statTotalNet">$0</strong></div>
+          <div class="row"><span>Losses:</span><strong id="statLosses">0</strong></div>
+          <div class="row"><span>Wins:</span><strong id="statWins">0</strong></div>
+          <div class="row"><span>Green:</span><strong id="statGreen">0</strong></div>
+          <div class="row"><span>Black:</span><strong id="statBlack">0</strong></div>
+          <div class="row"><span>Red:</span><strong id="statRed">0</strong></div>
         </div>
       </section>
 
@@ -32,13 +32,13 @@ include __DIR__ . '/../includes/header.html';
       <section class="tab-content" id="upgrades">
         <h3>Upgrades Statistics</h3>
         <div class="stats-list">
-          <div class="row"><span>Bought Upgrades:</span><strong>5</strong></div>
-          <div class="row"><span>Remaining Upgrades:</span><strong>2</strong></div>
-          <div class="row"><span>Total Spent on Upgrades:</span><strong>$1250</strong></div>
-          <div class="row"><span>Active Green Multiplier:</span><strong>2</strong></div>
-          <div class="row"><span>Active Red Multiplier:</span><strong>1.2</strong></div>
-          <div class="row"><span>Active Black Multiplier:</span><strong>1.2</strong></div>
-          <div class="row"><span>Green Chance:</span><strong>x2</strong></div>
+          <div class="row"><span>Bought Upgrades:</span><strong id="statBoughtUpgrades">0</strong></div>
+          <div class="row"><span>Remaining Upgrades:</span><strong id="statRemainingUpgrades">0</strong></div>
+          <div class="row"><span>Total Spent on Upgrades:</span><strong id="statTotalSpentUpgrades">$0</strong></div>
+          <div class="row"><span>Active Green Multiplier:</span><strong id="statGreenMultiplier">1</strong></div>
+          <div class="row"><span>Active Red Multiplier:</span><strong id="statRedMultiplier">2</strong></div>
+          <div class="row"><span>Active Black Multiplier:</span><strong id="statBlackMultiplier">2</strong></div>
+          <div class="row"><span>Green Chance:</span><strong id="statGreenChance">x1</strong></div>
         </div>
       </section>
 
@@ -46,9 +46,9 @@ include __DIR__ . '/../includes/header.html';
       <section class="tab-content" id="other">
         <h3>Other Statistics</h3>
         <div class="stats-list">
-          <div class="row"><span>Total Games:</span><strong>127</strong></div>
-          <div class="row"><span>Highest Win:</span><strong>$500</strong></div>
-          <div class="row"><span>Highest Loss:</span><strong>$100</strong></div>
+          <div class="row"><span>Total Games:</span><strong id="statTotalGames">0</strong></div>
+          <div class="row"><span>Highest Win:</span><strong id="statHighestWin">$0</strong></div>
+          <div class="row"><span>Highest Loss:</span><strong id="statHighestLoss">$0</strong></div>
         </div>
       </section>
 

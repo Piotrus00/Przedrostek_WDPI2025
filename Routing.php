@@ -40,6 +40,10 @@ class Routing
             'controller' => 'UpgradesController',
             'action' => 'upgradesApi'
         ],
+        'api/statistics' => [
+            'controller' => 'StatisticsController',
+            'action' => 'statsApi'
+        ],
         'statistics' => [
             'controller' => 'StatisticsController',
             'action' => 'index'

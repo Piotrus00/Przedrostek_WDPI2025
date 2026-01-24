@@ -25,6 +25,16 @@ CREATE TABLE user_upgrades (
                                PRIMARY KEY (user_id, upgrade_id)
 );
 
+CREATE TABLE roulette_games (
+                                id SERIAL PRIMARY KEY,
+                                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                                total_bet INTEGER NOT NULL DEFAULT 0,
+                                payout INTEGER NOT NULL DEFAULT 0,
+                                result_number INTEGER NOT NULL,
+                                result_color VARCHAR(10) NOT NULL,
+                                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 INSERT INTO users (firstname, lastname, email, password, balance, role, bio, enabled)
 VALUES (
     'Test',

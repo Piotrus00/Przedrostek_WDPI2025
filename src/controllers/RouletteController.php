@@ -4,17 +4,20 @@ require_once 'AppController.php';
 require_once __DIR__ . '/../Services/RouletteGameService.php';
 require_once __DIR__ . '/../repository/UserRepository.php';
 require_once __DIR__ . '/../repository/UpgradesRepository.php';
+require_once __DIR__ . '/../repository/StatisticsRepository.php';
 
 class RouletteController extends AppController
 {
 	private UserRepository $userRepository;
 	private UpgradesRepository $upgradesRepository;
+	private StatisticsRepository $statisticsRepository;
 
     public function __construct()
     {
         parent::__construct();
 		$this->userRepository = new UserRepository();
 		$this->upgradesRepository = new UpgradesRepository();
+		$this->statisticsRepository = new StatisticsRepository();
     }
 
     #[RequireLogin]
@@ -79,6 +82,16 @@ class RouletteController extends AppController
 				$newBalance = $currentBalance - $totalBet + $payout;
 				$this->userRepository->updateUserBalance((int) $userId, $newBalance);
 				$_SESSION['user_balance'] = $newBalance;
+
+				$resultNumber = isset($result['num']) ? (int) $result['num'] : 0;
+				$resultColor = isset($result['color']) ? (string) $result['color'] : 'green';
+				$this->statisticsRepository->logRouletteGame(
+					(int) $userId,
+					$totalBet,
+					$payout,
+					$resultNumber,
+					$resultColor
+				);
 
 				echo json_encode([
 					'success' => true,

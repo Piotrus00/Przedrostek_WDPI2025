@@ -30,14 +30,20 @@ async function purchaseUpgrade(id) {
     });
     const data = await response.json();
     if (data && data.success) {
+      const previousUpgrade = upgrades.find(upgrade => upgrade.id === id);
+      const expectedLevel = previousUpgrade
+        ? Math.min(previousUpgrade.currentLevel + 1, previousUpgrade.maxLevel)
+        : null;
+
       userBalance = Number(data.balance) || 0;
       if (Array.isArray(data.upgrades)) {
         upgrades = data.upgrades;
-      } else {
+      }
+      if (expectedLevel !== null) {
         upgrades = upgrades.map(upgrade => {
           if (upgrade.id !== id) return upgrade;
-          const nextLevel = Math.min(upgrade.currentLevel + 1, upgrade.maxLevel);
-          return { ...upgrade, currentLevel: nextLevel };
+          const currentLevel = typeof upgrade.currentLevel === 'number' ? upgrade.currentLevel : 0;
+          return { ...upgrade, currentLevel: Math.max(currentLevel, expectedLevel) };
         });
       }
       balanceEl.textContent = userBalance;

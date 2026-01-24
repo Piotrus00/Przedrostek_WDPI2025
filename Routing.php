@@ -9,6 +9,7 @@ require_once 'src/controllers/AdminPanelController.php';
 require_once 'src/controllers/BalanceController.php';
 require_once 'src/middleware/checkRequestAllowed.php';
 require_once 'src/middleware/checkAuthRequirements.php';
+
 class Routing
 {
     public static $routes = [
@@ -65,10 +66,10 @@ class Routing
     public static function run(string $path)
     {
         if (array_key_exists($path, self::$routes)) {
-            $controllerName = self::$routes[$path]['controller'];
-            $action = self::$routes[$path]['action'];
+            $controllerName = self::$routes[$path]['controller']; # SecurityController
+            $action = self::$routes[$path]['action']; # login
 
-            $object = self::getControllerInstance($controllerName); # pobiera instancję kontrolera
+            $object = self::getControllerInstance($controllerName); # tworzy instancję kontrolera(Singleton)
 
             checkRequestAllowed($object, $action); # sprawdza dozwolone metody
             checkAuthRequirements($object, $action); # sprawdza wymagania autoryzacji

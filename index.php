@@ -1,9 +1,11 @@
 <?php
+
 session_start();
 require 'Routing.php';
+
 try {
-    $path = trim($_SERVER['REQUEST_URI'], '/');
-    $path = parse_url($path, PHP_URL_PATH);
+    $path = trim($_SERVER['REQUEST_URI'], '/'); # /localhost:8000/login -> localhost:8000/login
+    $path = parse_url($path, PHP_URL_PATH); # localhost:8000/login -> login
 
     Routing::run($path);
 }
@@ -21,7 +23,7 @@ catch (\Exception $e) {
         exit;
     }
     if ($e->getCode() === 403) {
-        http_response_code(403);
+        http_response_code(403); // brak uprawnień
         include 'public/views/403.html';
         exit;
     }

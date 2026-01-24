@@ -3,17 +3,12 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
 require_once __DIR__ . '/../annotation/RequireLogin.php';
-require_once __DIR__ . '/../repository/UserRepository.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
+
+use App\Models\UserDefinition;
 
 class BalanceController extends AppController
 {
-    private UserRepository $userRepository;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->userRepository = new UserRepository();
-    }
 
     #[AllowedMethods(['GET'])]
     #[RequireLogin]
@@ -30,7 +25,7 @@ class BalanceController extends AppController
 
         $balance = isset($_SESSION['user_balance'])
             ? (int) $_SESSION['user_balance']
-            : $this->userRepository->getUserBalanceById((int) $userId);
+            : UserDefinition::getBalanceById((int) $userId);
 
         $_SESSION['user_balance'] = $balance;
 

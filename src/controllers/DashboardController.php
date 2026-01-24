@@ -1,10 +1,10 @@
 <?php
 
+#Router mapuje URLe na odpowiednie kontrolery i akcje
 require_once 'AppController.php';
-require_once __DIR__.'/../repository/UserRepository.php';
 class DashboardController extends AppController {
-    #[RequireLogin]
-    public function roulette(): void
+    #[RequireLogin] # wymagane logowanie
+    public function roulette(): void # metoda renderująca widok roulette
     {
         $this->render('roulette');
     }

@@ -2,21 +2,20 @@
 
 require_once 'AppController.php';
 require_once __DIR__ . '/../Services/RouletteGameService.php';
-require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../repository/UpgradesRepository.php';
 require_once __DIR__ . '/../repository/StatisticsRepository.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
+require_once __DIR__ . '/../models/UserUpgrade.php';
+
+use App\Models\UserDefinition;
+use App\Models\UserUpgrade;
 
 class RouletteController extends AppController
 {
-	private UserRepository $userRepository;
-	private UpgradesRepository $upgradesRepository;
 	private StatisticsRepository $statisticsRepository;
 
     public function __construct()
     {
         parent::__construct();
-		$this->userRepository = new UserRepository();
-		$this->upgradesRepository = new UpgradesRepository();
 		$this->statisticsRepository = new StatisticsRepository();
     }
 
@@ -64,7 +63,7 @@ class RouletteController extends AppController
 
 				$currentBalance = isset($_SESSION['user_balance'])
 					? (int) $_SESSION['user_balance']
-					: $this->userRepository->getUserBalanceById((int) $userId);
+					: UserDefinition::getBalanceById((int) $userId);
 
 				if ($totalBet <= 0) {
 					throw new Exception('No bets placed');
@@ -73,14 +72,14 @@ class RouletteController extends AppController
 					throw new Exception('Insufficient balance');
 				}
 
-				$upgradeLevels = $this->upgradesRepository->getUserUpgradeLevels((int) $userId);
+				$upgradeLevels = UserUpgrade::getLevels((int) $userId);
 				$spin = RouletteGameService::spin($upgradeLevels);
 				$result = $spin['result'];
 				$randomIndex = $spin['index'];
 				$payout = RouletteGameService::calculateWinnings($bets, $result, $upgradeLevels, $totalBet);
 
 				$newBalance = $currentBalance - $totalBet + $payout;
-				$this->userRepository->updateUserBalance((int) $userId, $newBalance);
+				UserDefinition::updateBalance((int) $userId, $newBalance);
 				$_SESSION['user_balance'] = $newBalance;
 
 				$resultNumber = isset($result['num']) ? (int) $result['num'] : 0;

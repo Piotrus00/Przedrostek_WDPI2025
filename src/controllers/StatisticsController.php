@@ -3,21 +3,22 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
 require_once __DIR__ . '/../annotation/RequireLogin.php';
-require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../repository/UpgradesRepository.php';
 require_once __DIR__ . '/../repository/StatisticsRepository.php';
+require_once __DIR__ . '/../models/UpgradeDefinition.php';
+require_once __DIR__ . '/../models/UserUpgrade.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
+
+use App\Models\UpgradeDefinition;
+use App\Models\UserUpgrade;
+use App\Models\UserDefinition;
 
 class StatisticsController extends AppController
 {
-    private UserRepository $userRepository;
-    private UpgradesRepository $upgradesRepository;
     private StatisticsRepository $statisticsRepository;
 
     public function __construct()
     {
         parent::__construct();
-        $this->userRepository = new UserRepository();
-        $this->upgradesRepository = new UpgradesRepository();
         $this->statisticsRepository = new StatisticsRepository();
     }
 
@@ -42,28 +43,25 @@ class StatisticsController extends AppController
 
         $balance = isset($_SESSION['user_balance'])
             ? (int) $_SESSION['user_balance']
-            : $this->userRepository->getUserBalanceById((int) $userId);
+            : UserDefinition::getBalanceById((int) $userId);
         $_SESSION['user_balance'] = $balance;
 
         $gameStats = $this->statisticsRepository->getUserGameStats((int) $userId);
-        $definitions = $this->upgradesRepository->getDefinitions();
-        $levels = $this->upgradesRepository->getUserUpgradeLevels((int) $userId);
+        $definitions = UpgradeDefinition::fetchAll();
+        $levels = UserUpgrade::getLevels((int) $userId);
 
         $totalMaxLevels = 0;
         $totalBoughtLevels = 0;
         $totalSpent = 0;
 
         foreach ($definitions as $def) {
-            $maxLevel = (int) $def['max_level'];
-            $baseCost = (int) $def['base_cost'];
-            $id = (string) $def['id'];
+            $maxLevel = (int) $def->maxLevel;
+            $id = (string) $def->id;
             $level = isset($levels[$id]) ? (int) $levels[$id] : 0;
 
             $totalMaxLevels += $maxLevel;
             $totalBoughtLevels += $level;
-            if ($level > 0) {
-                $totalSpent += $baseCost * ($level * ($level + 1) / 2);
-            }
+            $totalSpent += $def->totalCostForLevel($level);
         }
 
         $remainingUpgrades = max(0, $totalMaxLevels - $totalBoughtLevels);

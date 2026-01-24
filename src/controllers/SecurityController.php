@@ -1,15 +1,11 @@
 <?php
 
 require_once 'AppController.php';
-require_once __DIR__.'/../repository/UserRepository.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
-class SecurityController extends AppController {
-    private $userRepository;
 
-    public function __construct() {
-        parent::__construct();
-        $this->userRepository = new UserRepository();
-    }
+use App\Models\UserDefinition;
+class SecurityController extends AppController {
 
     #[AllowedMethods(['POST', 'GET'])]
     public function login() {
@@ -25,20 +21,17 @@ class SecurityController extends AppController {
             return $this->render("login", ["message" => "Fill all fields"]);
         }
 
-        $user = $this->userRepository->getUserByEmail($email);
+        $user = UserDefinition::findByEmail($email);
 
         if(!$user){
             return $this->render("login", ["message" => "User not found"]);
 
         }
-       if(!password_verify($password, $user['password'])){
+       if(!password_verify($password, $user->password)){
            return $this->render("login", ["message" => "Wrong password"]);
        }
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_email'] = $user['email'];
-        $_SESSION['user_role'] = $user['role'] ?? 'user';
-        $_SESSION['user_balance'] = isset($user['balance']) ? (int) $user['balance'] : 0;
+        $_SESSION = array_merge($_SESSION, $user->toSessionData());
 
         $url = "http://$_SERVER[HTTP_HOST]";
         header("Location: {$url}/dashboard");
@@ -64,7 +57,7 @@ class SecurityController extends AppController {
             return $this->render('register', ['messages' => ['Passwords should be the same!']]);
         }
 
-        $existingUser = $this->userRepository->getUserByEmail($email);
+        $existingUser = UserDefinition::findByEmail($email);
 
         if ($existingUser) {
             return $this->render('register', ['messages' => ['User with this email already exists!']]);
@@ -74,7 +67,7 @@ class SecurityController extends AppController {
 
         $initialBalance = 1000;
 
-        $this->userRepository->createUser(
+        UserDefinition::create(
             $email,
             $hashedPassword,
             $firstname,

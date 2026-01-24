@@ -3,21 +3,16 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
 require_once __DIR__ . '/../annotation/RequireLogin.php';
-require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../repository/UpgradesRepository.php';
+require_once __DIR__ . '/../models/UpgradeDefinition.php';
+require_once __DIR__ . '/../models/UserUpgrade.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
+
+use App\Models\UpgradeDefinition;
+use App\Models\UserUpgrade;
+use App\Models\UserDefinition;
 
 class UpgradesController extends AppController
 {
-    private UserRepository $userRepository;
-    private UpgradesRepository $upgradesRepository;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->userRepository = new UserRepository();
-        $this->upgradesRepository = new UpgradesRepository();
-    }
-
     #[RequireLogin]
     public function index(): void
     {
@@ -26,28 +21,17 @@ class UpgradesController extends AppController
 
     private function getUpgradesDefinition(): array
     {
-    # use the repository to fetch upgrade definitions
-    $definitions = $this->upgradesRepository->getDefinitions();
-
-        return array_map(function (array $def) {
-            return [
-                'id' => (string) $def['id'],
-                'title' => $def['title'],
-                'description' => $def['description'],
-                'baseCost' => (int) $def['base_cost'],
-                'maxLevel' => (int) $def['max_level']
-            ];
-        }, $definitions);
+        return UpgradeDefinition::fetchAll();
     }
 
     private function getUserUpgrades(int $userId): array
     {
-        return $this->upgradesRepository->getUserUpgradeLevels($userId);
+        return UserUpgrade::getLevels($userId);
     }
 
     private function setUserUpgradeLevel(int $userId, int $upgradeId, int $level): void
     {
-        $this->upgradesRepository->setUserUpgradeLevel($userId, $upgradeId, $level);
+        UserUpgrade::setLevel($userId, $upgradeId, $level);
     }
 
     #[AllowedMethods(['GET', 'POST'])]
@@ -67,17 +51,17 @@ class UpgradesController extends AppController
         $levels = $this->getUserUpgrades((int) $userId);
 
         $buildUpgrades = function () use ($definitions, $levels): array {
-            return array_map(function ($def) use ($levels) {
-                $id = $def['id'];
+            return array_map(function (UpgradeDefinition $def) use ($levels): array {
+                $id = (string) $def->id;
                 $currentLevel = isset($levels[$id]) ? (int) $levels[$id] : 0;
-                return array_merge($def, ['currentLevel' => $currentLevel]);
+                return array_merge($def->toArray(), ['currentLevel' => $currentLevel]);
             }, $definitions);
         };
 
         if ($this->isGet()) {
             $balance = isset($_SESSION['user_balance'])
                 ? (int) $_SESSION['user_balance']
-                : $this->userRepository->getUserBalanceById((int) $userId);
+                : UserDefinition::getBalanceById((int) $userId);
             $_SESSION['user_balance'] = $balance;
 
             echo json_encode([
@@ -107,7 +91,7 @@ class UpgradesController extends AppController
 
         $definition = null;
         foreach ($definitions as $def) {
-            if ((int) $def['id'] === $upgradeIdInt) {
+            if ((int) $def->id === $upgradeIdInt) {
                 $definition = $def;
                 break;
             }
@@ -120,17 +104,17 @@ class UpgradesController extends AppController
         }
 
         $currentLevel = isset($levels[(string) $upgradeIdInt]) ? (int) $levels[(string) $upgradeIdInt] : 0;
-        if ($currentLevel >= (int) $definition['maxLevel']) {
+        if ($currentLevel >= (int) $definition->maxLevel) {
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Upgrade already maxed']);
             return;
         }
 
-        $nextCost = (int) $definition['baseCost'] * ($currentLevel + 1);
+        $nextCost = $definition->nextCost($currentLevel);
 
         $balance = isset($_SESSION['user_balance'])
             ? (int) $_SESSION['user_balance']
-            : $this->userRepository->getUserBalanceById((int) $userId);
+            : UserDefinition::getBalanceById((int) $userId);
 
         if ($balance < $nextCost) {
             http_response_code(400);
@@ -139,7 +123,7 @@ class UpgradesController extends AppController
         }
 
         $newBalance = $balance - $nextCost;
-        $this->userRepository->updateUserBalance((int) $userId, $newBalance);
+        UserDefinition::updateBalance((int) $userId, $newBalance);
         $_SESSION['user_balance'] = $newBalance;
 
         $this->setUserUpgradeLevel((int) $userId, $upgradeIdInt, $currentLevel + 1);

@@ -68,29 +68,29 @@ class Routing
             $controllerName = self::$routes[$path]['controller'];
             $action = self::$routes[$path]['action'];
 
-            $object = self::getControllerInstance($controllerName);
+            $object = self::getControllerInstance($controllerName); # pobiera instancję kontrolera
 
-            checkRequestAllowed($object, $action);
-            checkAuthRequirements($object, $action);
+            checkRequestAllowed($object, $action); # sprawdza dozwolone metody
+            checkAuthRequirements($object, $action); # sprawdza wymagania autoryzacji
 
             $object->$action();
             return;
         }
-        if (preg_match('#^card-details/([0-9]+)$#', $path, $matches)) {
+        // if (preg_match('#^card-details/([0-9]+)$#', $path, $matches)) {
 
-            $id = $matches[1];
+        //     $id = $matches[1];
 
-            $object = self::getControllerInstance('DashboardController');
+        //     $object = self::getControllerInstance('DashboardController');
 
-            $object->details($id);
+        //     $object->details($id);
 
-            return;
-        }
+        //     return;
+        // }
         include 'public/views/404.html';
     }
     private static function getControllerInstance($controllerName) {
         if (!isset(self::$instances[$controllerName])) {
-            self::$instances[$controllerName] = new $controllerName();
+            self::$instances[$controllerName] = $controllerName::getInstance();
         }
         return self::$instances[$controllerName];
     }

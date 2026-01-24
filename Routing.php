@@ -24,10 +24,6 @@ class Routing
             'controller' => 'DashboardController',
             'action' => 'index'
         ],
-        'search-cards' => [
-            'controller' => 'DashboardController',
-            'action' => 'search'
-        ],
         'roulette' => [
             'controller' => 'RouletteController',
             'action' => 'index'

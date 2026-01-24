@@ -31,7 +31,15 @@ async function purchaseUpgrade(id) {
     const data = await response.json();
     if (data && data.success) {
       userBalance = Number(data.balance) || 0;
-      upgrades = Array.isArray(data.upgrades) ? data.upgrades : upgrades;
+      if (Array.isArray(data.upgrades)) {
+        upgrades = data.upgrades;
+      } else {
+        upgrades = upgrades.map(upgrade => {
+          if (upgrade.id !== id) return upgrade;
+          const nextLevel = Math.min(upgrade.currentLevel + 1, upgrade.maxLevel);
+          return { ...upgrade, currentLevel: nextLevel };
+        });
+      }
       balanceEl.textContent = userBalance;
       if (window.updateBalanceDisplay) {
         window.updateBalanceDisplay(userBalance);

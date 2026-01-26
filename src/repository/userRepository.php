@@ -27,6 +27,7 @@ class UserRepository extends Repository
             INSERT INTO users (email, password, firstname, lastname, balance, role) VALUES (?,?,?,?,?,?);
             ');
             $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $balance, $role]);
+            // Insert odpowiedzialny za tworzenie użytkownika (SecurityController::register)
 
             $connection->commit();
         } catch (Throwable $e) {

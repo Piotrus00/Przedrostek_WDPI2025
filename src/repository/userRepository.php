@@ -17,11 +17,24 @@ class UserRepository extends Repository
         return $users;
     }
 
+    #transkacja
     public function createUser(string $email, string $hashedPassword, string $firstName, string $lastName, string $role = 'user', int $balance = 1000 ): void{
-        $stmt = $this->database->connect()->prepare('
-        INSERT INTO users (email, password, firstname, lastname, balance, role) VALUES (?,?,?,?,?,?);
-        ');
-        $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $balance, $role]);
+        $connection = $this->database->connect();
+        try {
+            $connection->beginTransaction();
+
+            $stmt = $connection->prepare('
+            INSERT INTO users (email, password, firstname, lastname, balance, role) VALUES (?,?,?,?,?,?);
+            ');
+            $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $balance, $role]);
+
+            $connection->commit();
+        } catch (Throwable $e) {
+            if ($connection->inTransaction()) {
+                $connection->rollBack();
+            }
+            throw $e;
+        }
     }
 
     public function getUserByEmail(string $email) {

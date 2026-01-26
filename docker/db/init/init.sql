@@ -1,3 +1,5 @@
+-- TABELE
+
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
                        firstname VARCHAR(100) NOT NULL,
@@ -35,6 +37,26 @@ CREATE TABLE roulette_games (
                                 created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- WIDOKI
+-- COALESCE użyte, aby uniknąć wartości NULL w wynikach agregacji
+CREATE VIEW v_user_game_stats AS
+SELECT
+    user_id,
+    COUNT(*) AS total_games,
+    COALESCE(SUM(total_bet), 0) AS total_bet,
+    COALESCE(SUM(payout), 0) AS total_payout,
+    COALESCE(SUM(payout - total_bet), 0) AS total_net,
+    COALESCE(SUM(CASE WHEN (payout - total_bet) > 0 THEN 1 ELSE 0 END), 0) AS wins,
+    COALESCE(SUM(CASE WHEN (payout - total_bet) < 0 THEN 1 ELSE 0 END), 0) AS losses,
+    COALESCE(SUM(CASE WHEN result_color = 'green' THEN 1 ELSE 0 END), 0) AS green,
+    COALESCE(SUM(CASE WHEN result_color = 'red' THEN 1 ELSE 0 END), 0) AS red,
+    COALESCE(SUM(CASE WHEN result_color = 'black' THEN 1 ELSE 0 END), 0) AS black,
+    COALESCE(MAX(CASE WHEN (payout - total_bet) > 0 THEN (payout - total_bet) ELSE NULL END), 0) AS highest_win,
+    COALESCE(MIN(CASE WHEN (payout - total_bet) < 0 THEN (payout - total_bet) ELSE NULL END), 0) AS highest_loss
+FROM roulette_games
+GROUP BY user_id;
+
+-- POCZĄTKOWE DANE
 INSERT INTO users (firstname, lastname, email, password, balance, role, bio, enabled)
 VALUES (
     'Test',
@@ -52,7 +74,7 @@ VALUES (
     'User',
     'admin@example.com',
     '$2y$10$HMSh7s6x2P1nRMBKtgwYoe2z4OXbNURQhRpVjZwt6EXOVliuTIYIS',
-    5000,
+    500000,
     'admin',
     'Konto administratora.',
     TRUE

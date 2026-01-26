@@ -1,15 +1,11 @@
 <?php
 
 require_once 'AppController.php';
-require_once __DIR__.'/../repository/UserRepository.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
-class SecurityController extends AppController {
-    private $userRepository;
 
-    public function __construct() {
-        parent::__construct();
-        $this->userRepository = new UserRepository();
-    }
+use App\Models\UserDefinition;
+class SecurityController extends AppController {
 
     #[AllowedMethods(['POST', 'GET'])]
     public function login() {
@@ -25,23 +21,20 @@ class SecurityController extends AppController {
             return $this->render("login", ["message" => "Fill all fields"]);
         }
 
-        $user = $this->userRepository->getUserByEmail($email);
+        $user = UserDefinition::findByEmail($email); // szukamy uytkownika o podanym emailu
 
         if(!$user){
-            return $this->render("login", ["message" => "User not found"]);
+            return $this->render("login", ["message" => "Wrong email or password"]); // nie znaleziono uytkownika
 
         }
-       if(!password_verify($password, $user['password'])){
-           return $this->render("login", ["message" => "Wrong password"]);
+       if(!password_verify($password, $user->password)){
+           return $this->render("login", ["message" => "Wrong email or password"]); // niepoprawne hasło
        }
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_email'] = $user['email'];
-        $_SESSION['user_role'] = $user['role'] ?? 'user';
-        $_SESSION['user_balance'] = isset($user['balance']) ? (int) $user['balance'] : 0;
+        $_SESSION = array_merge($_SESSION, $user->toSessionData()); // zapisujemy dane uytkownika w sesji
 
         $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}/dashboard");
+        header("Location: {$url}/roulette"); // zakładamy, że dashboard to strona po zalogowaniu
     }
     #[AllowedMethods(['POST', 'GET'])]
     public function register() {
@@ -64,26 +57,28 @@ class SecurityController extends AppController {
             return $this->render('register', ['messages' => ['Passwords should be the same!']]);
         }
 
-        $existingUser = $this->userRepository->getUserByEmail($email);
+        $existingUser = UserDefinition::findByEmail($email); // sprawdzamy, czy uzytkownik juz istnieje
 
         if ($existingUser) {
             return $this->render('register', ['messages' => ['User with this email already exists!']]);
         }
 
-        $hashedPassword = password_hash($password1, PASSWORD_BCRYPT);
+        $hashedPassword = password_hash($password1, PASSWORD_BCRYPT); // hashowanie hasła BCRYPT
 
-        $initialBalance = 1000;
+        $initialBalance = 1000; // ustalamy początkowy balans dla nowego uzytkownika
+        $default_role = 'user';
 
-        $this->userRepository->createUser(
+        # tworzymy nowego uzytkownika przez userDefinition(model) 
+        UserDefinition::create(
             $email,
             $hashedPassword,
             $firstname,
             $lastname,
-            'user',
+            $default_role,
             $initialBalance
         );
 
-        return $this->render("login", ["message" => "Zarejestrowano uytkownika ".$email]);
+        return $this->render("login", ["message" => "Zarejestrowano uzytkownika ".$email]);
     }
 
     public function logout()
@@ -96,7 +91,7 @@ class SecurityController extends AppController {
         // czyścimy wszystkie dane sesji
         $_SESSION = [];
 
-        // opcjonalnie, kasujemy ciasteczko sesji po stronie przeglądarki
+        // kasujemy ciasteczko sesji po stronie przeglądarki
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(
@@ -110,7 +105,7 @@ class SecurityController extends AppController {
             );
         }
 
-        // niszczymy sesję
+        // niszczymy sesję po stronie serwera
         session_destroy();
 
         // przekierowanie np. na ekran logowania

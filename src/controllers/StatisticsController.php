@@ -3,21 +3,22 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
 require_once __DIR__ . '/../annotation/RequireLogin.php';
-require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../repository/UpgradesRepository.php';
 require_once __DIR__ . '/../repository/StatisticsRepository.php';
+require_once __DIR__ . '/../models/UpgradeDefinition.php';
+require_once __DIR__ . '/../models/UserUpgrade.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
+
+use App\Models\UpgradeDefinition;
+use App\Models\UserUpgrade;
+use App\Models\UserDefinition;
 
 class StatisticsController extends AppController
 {
-    private UserRepository $userRepository;
-    private UpgradesRepository $upgradesRepository;
     private StatisticsRepository $statisticsRepository;
 
     public function __construct()
     {
         parent::__construct();
-        $this->userRepository = new UserRepository();
-        $this->upgradesRepository = new UpgradesRepository();
         $this->statisticsRepository = new StatisticsRepository();
     }
 
@@ -31,48 +32,48 @@ class StatisticsController extends AppController
     #[RequireLogin]
     public function statsApi(): void
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json'); // zwracamy JSON
 
-        $userId = $_SESSION['user_id'] ?? null;
+        $userId = $_SESSION['user_id'] ?? null; // pobranie ID użytkownika z sesji
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'Not logged in']);
             return;
         }
 
-        $balance = isset($_SESSION['user_balance'])
+        $balance = isset($_SESSION['user_balance']) // pobranie salda z sesji/bazy
             ? (int) $_SESSION['user_balance']
-            : $this->userRepository->getUserBalanceById((int) $userId);
-        $_SESSION['user_balance'] = $balance;
+            : UserDefinition::getBalanceById((int) $userId);
+        $_SESSION['user_balance'] = $balance; // aktualizacja salda w sesji
 
-        $gameStats = $this->statisticsRepository->getUserGameStats((int) $userId);
-        $definitions = $this->upgradesRepository->getDefinitions();
-        $levels = $this->upgradesRepository->getUserUpgradeLevels((int) $userId);
+        $gameStats = $this->statisticsRepository->getUserGameStats((int) $userId); // pobranie statystyk gier
+        $definitions = UpgradeDefinition::fetchAll(); // pobranie definicji ulepszeń
+        $levels = UserUpgrade::getLevels((int) $userId); // pobranie poziomów ulepszeń użytkownika
 
         $totalMaxLevels = 0;
         $totalBoughtLevels = 0;
         $totalSpent = 0;
 
+        # przypisanie statystyk ulepszeń
         foreach ($definitions as $def) {
-            $maxLevel = (int) $def['max_level'];
-            $baseCost = (int) $def['base_cost'];
-            $id = (string) $def['id'];
+            $maxLevel = (int) $def->maxLevel;
+            $id = (string) $def->id;
             $level = isset($levels[$id]) ? (int) $levels[$id] : 0;
 
             $totalMaxLevels += $maxLevel;
             $totalBoughtLevels += $level;
-            if ($level > 0) {
-                $totalSpent += $baseCost * ($level * ($level + 1) / 2);
-            }
+            $totalSpent += $def->totalCostForLevel($level);
         }
 
-        $remainingUpgrades = max(0, $totalMaxLevels - $totalBoughtLevels);
+        $remainingUpgrades = max(0, $totalMaxLevels - $totalBoughtLevels); // pozostałe ulepszenia do kupienia
 
-        $blackLevel = isset($levels['2']) ? (int) $levels['2'] : 0;
-        $redLevel = isset($levels['3']) ? (int) $levels['3'] : 0;
-        $greenLevel = isset($levels['4']) ? (int) $levels['4'] : 0;
-        $luckyGreenLevel = isset($levels['5']) ? (int) $levels['5'] : 0;
+        #pobranie poziomów poszczególnych ulepszeń
+        $blackLevel = isset($levels['2']) ? (int) $levels['2'] : 0; //czarny
+        $redLevel = isset($levels['3']) ? (int) $levels['3'] : 0; //czerwony
+        $greenLevel = isset($levels['4']) ? (int) $levels['4'] : 0; //zielony
+        $luckyGreenLevel = isset($levels['5']) ? (int) $levels['5'] : 0; //szansa zielony
 
+        # przygotowanie odpowiedzi JSON
         $response = [
             'success' => true,
             'general' => [
@@ -89,8 +90,8 @@ class StatisticsController extends AppController
                 'remainingUpgrades' => $remainingUpgrades,
                 'totalSpent' => (int) $totalSpent,
                 'greenMultiplier' => 1 + $greenLevel,
-                'redMultiplier' => round(2 + (0.2 * $redLevel), 1),
-                'blackMultiplier' => round(2 + (0.2 * $blackLevel), 1),
+                'redMultiplier' => round(1 + (0.2 * $redLevel), 1),
+                'blackMultiplier' => round(1 + (0.2 * $blackLevel), 1),
                 'greenChance' => 1 + $luckyGreenLevel,
             ],
             'other' => [
@@ -100,6 +101,6 @@ class StatisticsController extends AppController
             ]
         ];
 
-        echo json_encode($response);
+        echo json_encode($response); // zwrócenie odpowiedzi JSON
     }
 }

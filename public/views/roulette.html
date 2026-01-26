@@ -16,7 +16,7 @@ $extraScripts = [
 include __DIR__ . '/../includes/header.html'; ?>
 
 <div class="content-area roulette-page">
-    <div class="roulette-app">
+    <div class="roulette-app" data-initial-balance="<?php echo isset($_SESSION['user_balance']) ? (int) $_SESSION['user_balance'] : 0; ?>">
         <div class="roulette-container">
             <div class="horizontal-wheel-container">
                 <div class="wheel-pointer"></div>

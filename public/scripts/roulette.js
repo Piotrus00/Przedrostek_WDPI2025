@@ -25,6 +25,9 @@ const initRoulette = () => {
 		return;
 	}
 
+	const initialBalanceHost = document.querySelector('.roulette-app[data-initial-balance]');
+	userBalance = initialBalanceHost ? Number(initialBalanceHost.dataset.initialBalance) || 0 : 0;
+
     //kolejnosc liczb na kole
 	const rouletteNumbers = wheelEl.dataset.roulette ? JSON.parse(wheelEl.dataset.roulette) : [];
     //czerwone liczby
@@ -45,7 +48,7 @@ const initRoulette = () => {
 		updateSelectedChipUI();
 	};
 
-    //aktualizujemy UI wybranego przycisku za ile chcemy grac mozna wybra tylko 1 na raz +10 +50...
+    //aktualizujemy UI wybranego przycisku za ile chcemy grac mozna wybrac tylko 1 na raz +10 +50...
 	const updateSelectedChipUI = () => {
 		document.querySelectorAll('.chip-btn').forEach(btn => btn.classList.remove('selected'));
 		chipButtons.forEach(btn => {
@@ -137,22 +140,6 @@ const initRoulette = () => {
 		updateBetChips();
 	};
 
-	const fetchBalance = async () => {
-		try {
-			const response = await fetch('/api/balance');
-			const data = await response.json();
-			if (data && data.success) {
-				userBalance = Number(data.balance) || 0;
-				if (window.updateBalanceDisplay) {
-					window.updateBalanceDisplay(userBalance);
-				}
-				updateControlsUI();
-			}
-		} catch (error) {
-			// ignore
-		}
-	};
-
 	const spinWheel = async () => {
 		if (isSpinning || currentBet === 0) return; //blokady
 		if (currentBet > userBalance) return;
@@ -208,8 +195,8 @@ const initRoulette = () => {
         //drobne opoznienie przed animacja
 		setTimeout(() => {
 			const numberWidth = 54; //szerokosc pojedynczej liczby na kole
-			const repetitions = 3; //ile razy powtarzamy sekwencje liczb na kole
-			const winningIndexInLastSet = (repetitions - 1) * rouletteNumbers.length + randomIndex; //obliczamy index w ostatnim powtorzeniu
+			const repetitions = 4; //ile razy powtarzamy sekwencje liczb na kole
+			const winningIndexInLastSet = (repetitions - 2) * rouletteNumbers.length + randomIndex; //obliczamy index w ostatnim powtorzeniu
 
             //obliczamy przesuniecie kola tak aby wylosowana liczba znalazla sie na srodku
 			const containerWidth = wheelEl.parentElement ? wheelEl.parentElement.offsetWidth : wheelEl.offsetWidth;
@@ -267,7 +254,9 @@ const initRoulette = () => {
 	updateControlsUI(); //aktualizujemy UI
 	updateSelectedChipUI(); //aktualizujemy UI wybranego przycisku
 	updateBetChips(); //aktualizujemy zaklady w UI
-	fetchBalance();
+	if (window.updateBalanceDisplay) {
+		window.updateBalanceDisplay(userBalance);
+	}
 };
 
 //inicjalizacja gry po zaladowaniu DOM

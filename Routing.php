@@ -1,14 +1,13 @@
 <?php
 
 require_once 'src/controllers/SecurityController.php';
-require_once 'src/controllers/DashboardController.php';
 require_once 'src/controllers/RouletteController.php';
 require_once 'src/controllers/StatisticsController.php';
 require_once 'src/controllers/UpgradesController.php';
 require_once 'src/controllers/AdminPanelController.php';
-require_once 'src/controllers/BalanceController.php';
 require_once 'src/middleware/checkRequestAllowed.php';
 require_once 'src/middleware/checkAuthRequirements.php';
+
 class Routing
 {
     public static $routes = [
@@ -20,10 +19,6 @@ class Routing
             'controller' => 'SecurityController',
             'action' => 'register'
         ],
-        'dashboard' => [
-            'controller' => 'DashboardController',
-            'action' => 'index'
-        ],
         'roulette' => [
             'controller' => 'RouletteController',
             'action' => 'index'
@@ -31,10 +26,6 @@ class Routing
         'api/roulette' => [
             'controller' => 'RouletteController',
             'action' => 'gameApi'
-        ],
-        'api/balance' => [
-            'controller' => 'BalanceController',
-            'action' => 'balanceApi'
         ],
         'api/upgrades' => [
             'controller' => 'UpgradesController',
@@ -65,32 +56,32 @@ class Routing
     public static function run(string $path)
     {
         if (array_key_exists($path, self::$routes)) {
-            $controllerName = self::$routes[$path]['controller'];
-            $action = self::$routes[$path]['action'];
+            $controllerName = self::$routes[$path]['controller']; # SecurityController
+            $action = self::$routes[$path]['action']; # login
 
-            $object = self::getControllerInstance($controllerName);
+            $object = self::getControllerInstance($controllerName); # tworzy instancję kontrolera(Singleton)
 
-            checkRequestAllowed($object, $action);
-            checkAuthRequirements($object, $action);
+            checkRequestAllowed($object, $action); # sprawdza dozwolone metody
+            checkAuthRequirements($object, $action); # sprawdza wymagania autoryzacji
 
             $object->$action();
             return;
         }
-        if (preg_match('#^card-details/([0-9]+)$#', $path, $matches)) {
+        // if (preg_match('#^card-details/([0-9]+)$#', $path, $matches)) {
 
-            $id = $matches[1];
+        //     $id = $matches[1];
 
-            $object = self::getControllerInstance('DashboardController');
+        //     $object = self::getControllerInstance('DashboardController');
 
-            $object->details($id);
+        //     $object->details($id);
 
-            return;
-        }
+        //     return;
+        // }
         include 'public/views/404.html';
     }
     private static function getControllerInstance($controllerName) {
         if (!isset(self::$instances[$controllerName])) {
-            self::$instances[$controllerName] = new $controllerName();
+            self::$instances[$controllerName] = $controllerName::getInstance();
         }
         return self::$instances[$controllerName];
     }

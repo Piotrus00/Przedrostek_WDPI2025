@@ -3,21 +3,16 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
 require_once __DIR__ . '/../annotation/RequireLogin.php';
-require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../repository/UpgradesRepository.php';
+require_once __DIR__ . '/../models/UpgradeDefinition.php';
+require_once __DIR__ . '/../models/UserUpgrade.php';
+require_once __DIR__ . '/../models/UserDefinition.php';
+
+use App\Models\UpgradeDefinition;
+use App\Models\UserUpgrade;
+use App\Models\UserDefinition;
 
 class UpgradesController extends AppController
 {
-    private UserRepository $userRepository;
-    private UpgradesRepository $upgradesRepository;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->userRepository = new UserRepository();
-        $this->upgradesRepository = new UpgradesRepository();
-    }
-
     #[RequireLogin]
     public function index(): void
     {
@@ -26,28 +21,17 @@ class UpgradesController extends AppController
 
     private function getUpgradesDefinition(): array
     {
-    # use the repository to fetch upgrade definitions
-    $definitions = $this->upgradesRepository->getDefinitions();
-
-        return array_map(function (array $def) {
-            return [
-                'id' => (string) $def['id'],
-                'title' => $def['title'],
-                'description' => $def['description'],
-                'baseCost' => (int) $def['base_cost'],
-                'maxLevel' => (int) $def['max_level']
-            ];
-        }, $definitions);
+        return UpgradeDefinition::fetchAll(); // Pobiera wszystkie definicje ulepszeń z bazy danych
     }
 
     private function getUserUpgrades(int $userId): array
     {
-        return $this->upgradesRepository->getUserUpgradeLevels($userId);
+        return UserUpgrade::getLevels($userId); // Pobiera poziomy ulepszeń użytkownika z bazy danych
     }
 
     private function setUserUpgradeLevel(int $userId, int $upgradeId, int $level): void
     {
-        $this->upgradesRepository->setUserUpgradeLevel($userId, $upgradeId, $level);
+        UserUpgrade::setLevel($userId, $upgradeId, $level); // Ustawia poziom ulepszenia użytkownika(model)
     }
 
     #[AllowedMethods(['GET', 'POST'])]
@@ -56,28 +40,43 @@ class UpgradesController extends AppController
     {
         header('Content-Type: application/json');
 
-        $userId = $_SESSION['user_id'] ?? null;
+        $userId = $_SESSION['user_id'] ?? null; // Pobiera identyfikator zalogowanego użytkownika z sesji
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'Not logged in']);
             return;
         }
 
-        $definitions = $this->getUpgradesDefinition();
-        $levels = $this->getUserUpgrades((int) $userId);
+        $definitions = $this->getUpgradesDefinition();  // Pobiera definicje wszystkich ulepszeń
+        $levels = $this->getUserUpgrades((int) $userId); // Pobiera poziomy ulepszeń użytkownika
 
+        # Buduje tablicę ulepszeń z aktualnymi poziomami użytkownika
         $buildUpgrades = function () use ($definitions, $levels): array {
-            return array_map(function ($def) use ($levels) {
-                $id = $def['id'];
-                $currentLevel = isset($levels[$id]) ? (int) $levels[$id] : 0;
-                return array_merge($def, ['currentLevel' => $currentLevel]);
-            }, $definitions);
+            $upgradesResult = [];
+            // Iteracja po wszystkich definicjach ulepszeń
+            foreach ($definitions as $definition) {
+                $upgradeId = $definition->id;
+                $upgradeIdKey = (string) $upgradeId;
+                $currentLevel = 0;
+                // Sprawdzenie, czy użytkownik posiada już ten upgrade
+                if (array_key_exists($upgradeIdKey, $levels)) {
+                    $currentLevel = (int) $levels[$upgradeIdKey];
+                }
+                // Pobranie definicji upgrade'u jako tablicy
+                $definitionArray = $definition->toArray();
+                // Ręczne dodanie aktualnego poziomu
+                $definitionArray['currentLevel'] = $currentLevel;
+                $upgradesResult[] = $definitionArray;
+            }
+            // Zwrócenie pełnej tablicy ulepszeń
+            return $upgradesResult;
         };
 
+
         if ($this->isGet()) {
-            $balance = isset($_SESSION['user_balance'])
+            $balance = isset($_SESSION['user_balance']) // Pobiera saldo użytkownika z sesji lub bazy danych
                 ? (int) $_SESSION['user_balance']
-                : $this->userRepository->getUserBalanceById((int) $userId);
+                : UserDefinition::getBalanceById((int) $userId);
             $_SESSION['user_balance'] = $balance;
 
             echo json_encode([
@@ -89,7 +88,7 @@ class UpgradesController extends AppController
         }
 
         $rawInput = file_get_contents('php://input');
-        $input = json_decode($rawInput, true);
+        $input = json_decode($rawInput, true); // tablica asocjacyjna
         if (json_last_error() !== JSON_ERROR_NONE) {
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Invalid JSON input']);
@@ -105,32 +104,35 @@ class UpgradesController extends AppController
 
         $upgradeIdInt = (int) $upgradeId;
 
+        # Znalezienie definicji ulepszenia na podstawie podanego ID
         $definition = null;
         foreach ($definitions as $def) {
-            if ((int) $def['id'] === $upgradeIdInt) {
+            if ((int) $def->id === $upgradeIdInt) {
                 $definition = $def;
                 break;
             }
         }
 
+        # Sprawdzenie, czy definicja ulepszenia istnieje
         if (!$definition) {
             http_response_code(404);
             echo json_encode(['success' => false, 'error' => 'Upgrade not found']);
             return;
         }
 
+        # Sprawdzenie, czy użytkownik może wykupić kolejną poziom ulepszenia
         $currentLevel = isset($levels[(string) $upgradeIdInt]) ? (int) $levels[(string) $upgradeIdInt] : 0;
-        if ($currentLevel >= (int) $definition['maxLevel']) {
+        if ($currentLevel >= (int) $definition->maxLevel) {
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Upgrade already maxed']);
             return;
         }
 
-        $nextCost = (int) $definition['baseCost'] * ($currentLevel + 1);
+        $nextCost = $definition->nextCost($currentLevel);
 
         $balance = isset($_SESSION['user_balance'])
             ? (int) $_SESSION['user_balance']
-            : $this->userRepository->getUserBalanceById((int) $userId);
+            : UserDefinition::getBalanceById((int) $userId);
 
         if ($balance < $nextCost) {
             http_response_code(400);
@@ -138,11 +140,12 @@ class UpgradesController extends AppController
             return;
         }
 
+        # aktualizacja salda użytkownika
         $newBalance = $balance - $nextCost;
-        $this->userRepository->updateUserBalance((int) $userId, $newBalance);
+        UserDefinition::updateBalance((int) $userId, $newBalance);
         $_SESSION['user_balance'] = $newBalance;
 
-        $this->setUserUpgradeLevel((int) $userId, $upgradeIdInt, $currentLevel + 1);
+        $this->setUserUpgradeLevel((int) $userId, $upgradeIdInt, $currentLevel + 1); // aktualizacja poziomu ulepszenia użytkownika
 
         echo json_encode([
             'success' => true,

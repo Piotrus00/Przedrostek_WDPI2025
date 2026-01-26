@@ -2,6 +2,7 @@
 
 class RouletteGameService
 {
+	# duplikacja?
     private static function getUpgradeLevel(array $levels, string $id): int
     {
         return isset($levels[$id]) ? (int) $levels[$id] : 0;
@@ -58,24 +59,25 @@ class RouletteGameService
 
 	public static function spin(array $upgradeLevels = []): array
 	{
+		# ulepszenia modyfikujące koło ruletki
 		$rouletteNumbers = self::getRouletteNumbers();
 		$additionalSevenLevel = self::getUpgradeLevel($upgradeLevels, '1');
 		$luckyGreenLevel = self::getUpgradeLevel($upgradeLevels, '5');
 
 		if ($additionalSevenLevel > 0) {
 			for ($i = 0; $i < $additionalSevenLevel; $i++) {
-				$rouletteNumbers[] = ['num' => 7, 'color' => 'red'];
+				$rouletteNumbers[] = ['num' => 7, 'color' => 'red']; // Dodaje dodatkowe 7 do koła ruletki
 			}
 		}
 
 		if ($luckyGreenLevel > 0) {
 			for ($i = 0; $i < $luckyGreenLevel; $i++) {
-				$rouletteNumbers[] = ['num' => 0, 'color' => 'green'];
+				$rouletteNumbers[] = ['num' => 0, 'color' => 'green']; // Dodaje dodatkowe 0 do koła ruletki
 			}
 		}
 
-		$randomIndex = random_int(0, count($rouletteNumbers) - 1);
-		$result = $rouletteNumbers[$randomIndex];
+		$randomIndex = random_int(0, count($rouletteNumbers) - 1); // Wybiera losowy indeks z rozszerzonej tablicy liczb ruletki
+		$result = $rouletteNumbers[$randomIndex]; // Pobiera wynik na podstawie losowego indeksu
 
 		return [
 			'result' => $result,
@@ -93,9 +95,9 @@ class RouletteGameService
 		}
 
 		$totalWin = 0;
-		$blackMultiplier = 2 + (0.2 * self::getUpgradeLevel($upgradeLevels, '2'));
-		$redMultiplier = 2 + (0.2 * self::getUpgradeLevel($upgradeLevels, '3'));
-		$greenMultiplierLevel = self::getUpgradeLevel($upgradeLevels, '4');
+		$blackMultiplier = 2 + (0.2 * self::getUpgradeLevel($upgradeLevels, '2')); // Mnożnik dla czarnych zakładów z uwzględnieniem ulepszeń
+		$redMultiplier = 2 + (0.2 * self::getUpgradeLevel($upgradeLevels, '3')); // Mnożnik dla czerwonych zakładów z uwzględnieniem ulepszeń
+		$greenMultiplierLevel = self::getUpgradeLevel($upgradeLevels, '4'); // Mnożnik dla zielonych zakładów z uwzględnieniem ulepszeń
 
 		foreach ($bets as $bet) {
 			if (!is_array($bet)) {
@@ -114,7 +116,7 @@ class RouletteGameService
 				if ($betValue === (int) $num) {
 					$multiplier = 36;
 					if ($betValue === 0 && $greenMultiplierLevel > 0) {
-						$multiplier = (int) round($multiplier * (1 + $greenMultiplierLevel));
+						$multiplier = (int) round($multiplier * (1 + $greenMultiplierLevel)); // Zwiększa mnożnik dla zielonego zakładu w zależności od poziomu ulepszenia
 					}
 					$totalWin += $amount * $multiplier;
 				}
@@ -128,7 +130,7 @@ class RouletteGameService
 			switch ($betNumber) {
 				case 'red':
 					if ($color === 'red') {
-						$totalWin += (int) round($amount * $redMultiplier);
+						$totalWin += (int) round($amount * $redMultiplier); // Zwiększa wygraną dla czerwonych zakładów z uwzględnieniem ulepszeń
 					}
 					break;
 				case 'black':
@@ -136,38 +138,18 @@ class RouletteGameService
 						$totalWin += (int) round($amount * $blackMultiplier);
 					}
 					break;
-				case 'even':
-					if ($num !== 0 && $num % 2 === 0) {
-						$totalWin += $amount * 2;
-					}
-					break;
-				case 'odd':
-					if ($num % 2 === 1) {
-						$totalWin += $amount * 2;
-					}
-					break;
-				case '1-18':
-					if ($num >= 1 && $num <= 18) {
-						$totalWin += $amount * 2;
-					}
-					break;
-				case '19-36':
-					if ($num >= 19 && $num <= 36) {
-						$totalWin += $amount * 2;
-					}
-					break;
 			}
 		}
 
-		$moreMoneyLevel = self::getUpgradeLevel($upgradeLevels, '7');
+		$moreMoneyLevel = self::getUpgradeLevel($upgradeLevels, '7'); // Poziom ulepszenia "More Money"
 		if ($moreMoneyLevel > 0 && $totalWin > 0) {
-			$totalWin = (int) round($totalWin * (1 + (0.1 * $moreMoneyLevel)));
+			$totalWin = (int) round($totalWin * (1 + (0.1 * $moreMoneyLevel))); // Zwiększa całkowitą wygraną o 10% za każdy poziom ulepszenia
 		}
 
-		$refundLevel = self::getUpgradeLevel($upgradeLevels, '6');
+		$refundLevel = self::getUpgradeLevel($upgradeLevels, '6'); // Poziom ulepszenia "Refund"
 		if ($totalWin === 0 && $refundLevel > 0 && $totalBet > 0) {
-			$refundRoll = random_int(1, 100);
-			if ($refundRoll <= $refundLevel) {
+			$refundRoll = random_int(1, 100); // Rzut losowy od 1 do 100
+			if ($refundRoll <= $refundLevel) { // Szansa na zwrot równy poziomowi ulepszenia
 				$totalWin = $totalBet;
 			}
 		}

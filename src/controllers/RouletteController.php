@@ -28,7 +28,7 @@ class RouletteController extends AppController
     #[RequireLogin]
     public function gameApi()
 	{
-		header('Content-Type: application/json');
+		header('Content-Type: application/json'); // zwracamy JSON
 		try {
 			$userId = $_SESSION['user_id'] ?? null;
 			if (!$userId) {
@@ -42,14 +42,16 @@ class RouletteController extends AppController
 				throw new Exception('Invalid JSON input');
 			}
 
-			$action = $input['action'] ?? '';
+			$action = $input['action'] ?? ''; // akcja do wykonania
 
+			#spin ruletki
 			if ($action === 'spin') {
-				$bets = $input['bets'] ?? [];
+				$bets = $input['bets'] ?? []; // zakłady użytkownika
 				if (!is_array($bets)) {
 					$bets = [];
 				}
 
+				# Obliczanie łącznej kwoty zakładów
 				$totalBet = 0;
 				foreach ($bets as $bet) {
 					if (!is_array($bet)) {
@@ -61,27 +63,28 @@ class RouletteController extends AppController
 					}
 				}
 
-				$currentBalance = isset($_SESSION['user_balance'])
+				$currentBalance = isset($_SESSION['user_balance']) // saldo z sesji
 					? (int) $_SESSION['user_balance']
 					: UserDefinition::getBalanceById((int) $userId);
 
 				if ($totalBet <= 0) {
 					throw new Exception('No bets placed');
 				}
-				if ($currentBalance < $totalBet) {
+				if ($currentBalance < $totalBet) { // sprawdzenie salda z postawionymi zakładami
 					throw new Exception('Insufficient balance');
 				}
 
-				$upgradeLevels = UserUpgrade::getLevels((int) $userId);
-				$spin = RouletteGameService::spin($upgradeLevels);
-				$result = $spin['result'];
-				$randomIndex = $spin['index'];
-				$payout = RouletteGameService::calculateWinnings($bets, $result, $upgradeLevels, $totalBet);
+				$upgradeLevels = UserUpgrade::getLevels((int) $userId); // pobranie poziomów ulepszeń użytkownika
+				$spin = RouletteGameService::spin($upgradeLevels); // wykonanie obrotu ruletki z ulepszeniami
+				$result = $spin['result']; // wynik obrotu
+				$randomIndex = $spin['index']; // indeks wylosowanego numeru
+				$payout = RouletteGameService::calculateWinnings($bets, $result, $upgradeLevels, $totalBet); // obliczenie wygranej
 
-				$newBalance = $currentBalance - $totalBet + $payout;
-				UserDefinition::updateBalance((int) $userId, $newBalance);
-				$_SESSION['user_balance'] = $newBalance;
+				$newBalance = $currentBalance - $totalBet + $payout; // aktualizacja salda
+				UserDefinition::updateBalance((int) $userId, $newBalance); // zapis salda do bazy danych
+				$_SESSION['user_balance'] = $newBalance; // aktualizacja salda w sesji
 
+				# Logowanie gry do statystyk
 				$resultNumber = isset($result['num']) ? (int) $result['num'] : 0;
 				$resultColor = isset($result['color']) ? (string) $result['color'] : 'green';
 				$this->statisticsRepository->logRouletteGame(
@@ -91,7 +94,7 @@ class RouletteController extends AppController
 					$resultNumber,
 					$resultColor
 				);
-
+				# Zwracanie wyniku gry jako JSON
 				echo json_encode([
 					'success' => true,
 					'result' => $result,
@@ -101,7 +104,7 @@ class RouletteController extends AppController
 					'balance' => $newBalance
 				]);
 				exit;
-			}
+			} // koniec akcji 'spin'
 
 			throw new Exception('Unknown action: ' . htmlspecialchars($action));
 		} catch (Exception $e) {
@@ -111,7 +114,7 @@ class RouletteController extends AppController
 				'error' => $e->getMessage()
 			]);
 			exit;
-		}
+			}
 	}
 }
 

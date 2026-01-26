@@ -1,3 +1,5 @@
+-- TABELE
+
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
                        firstname VARCHAR(100) NOT NULL,
@@ -35,6 +37,8 @@ CREATE TABLE roulette_games (
                                 created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- WIDOKI
+-- COALESCE użyte, aby uniknąć wartości NULL w wynikach agregacji
 CREATE VIEW v_user_game_stats AS
 SELECT
     user_id,
@@ -52,7 +56,7 @@ SELECT
 FROM roulette_games
 GROUP BY user_id;
 
-
+-- POCZĄTKOWE DANE
 INSERT INTO users (firstname, lastname, email, password, balance, role, bio, enabled)
 VALUES (
     'Test',
@@ -70,7 +74,7 @@ VALUES (
     'User',
     'admin@example.com',
     '$2y$10$HMSh7s6x2P1nRMBKtgwYoe2z4OXbNURQhRpVjZwt6EXOVliuTIYIS',
-    5000,
+    500000,
     'admin',
     'Konto administratora.',
     TRUE

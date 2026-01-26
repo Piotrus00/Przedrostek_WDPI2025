@@ -23,6 +23,6 @@ class UserUpgrade
     public static function setLevel(int $userId, int $upgradeId, int $level): void
     {
         $repository = new UpgradesRepository();
-        $repository->setUserUpgradeLevel($userId, $upgradeId, $level);
+        $repository->setUserUpgradeLevel($userId, $upgradeId, $level); // Zapisuje poziom ulepszenia użytkownika(repository)
     }
 }

@@ -25,6 +25,9 @@ const initRoulette = () => {
 		return;
 	}
 
+	const initialBalanceHost = document.querySelector('.roulette-app[data-initial-balance]');
+	userBalance = initialBalanceHost ? Number(initialBalanceHost.dataset.initialBalance) || 0 : 0;
+
     //kolejnosc liczb na kole
 	const rouletteNumbers = wheelEl.dataset.roulette ? JSON.parse(wheelEl.dataset.roulette) : [];
     //czerwone liczby
@@ -135,22 +138,6 @@ const initRoulette = () => {
 		bets = [];
 		updateControlsUI();
 		updateBetChips();
-	};
-
-	const fetchBalance = async () => {
-		try {
-			const response = await fetch('/api/balance');
-			const data = await response.json();
-			if (data && data.success) {
-				userBalance = Number(data.balance) || 0;
-				if (window.updateBalanceDisplay) {
-					window.updateBalanceDisplay(userBalance);
-				}
-				updateControlsUI();
-			}
-		} catch (error) {
-			// ignore
-		}
 	};
 
 	const spinWheel = async () => {
@@ -267,7 +254,9 @@ const initRoulette = () => {
 	updateControlsUI(); //aktualizujemy UI
 	updateSelectedChipUI(); //aktualizujemy UI wybranego przycisku
 	updateBetChips(); //aktualizujemy zaklady w UI
-	fetchBalance(); //pobieramy saldo uzytkownika
+	if (window.updateBalanceDisplay) {
+		window.updateBalanceDisplay(userBalance);
+	}
 };
 
 //inicjalizacja gry po zaladowaniu DOM

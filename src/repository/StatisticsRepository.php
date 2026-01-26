@@ -25,6 +25,7 @@ class StatisticsRepository extends Repository
 
 public function getUserGameStats(int $userId): array
 {
+    # Pobiera statystyki gier użytkownika z widoku v_user_game_stats
     $stmt = $this->database->connect()->prepare("
         SELECT * FROM v_user_game_stats WHERE user_id = :user_id
     ");

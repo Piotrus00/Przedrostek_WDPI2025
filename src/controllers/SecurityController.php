@@ -21,20 +21,20 @@ class SecurityController extends AppController {
             return $this->render("login", ["message" => "Fill all fields"]);
         }
 
-        $user = UserDefinition::findByEmail($email);
+        $user = UserDefinition::findByEmail($email); // szukamy uytkownika o podanym emailu
 
         if(!$user){
-            return $this->render("login", ["message" => "User not found"]);
+            return $this->render("login", ["message" => "Wrong email or password"]); // nie znaleziono uytkownika
 
         }
        if(!password_verify($password, $user->password)){
-           return $this->render("login", ["message" => "Wrong password"]);
+           return $this->render("login", ["message" => "Wrong email or password"]); // niepoprawne hasło
        }
 
-        $_SESSION = array_merge($_SESSION, $user->toSessionData());
+        $_SESSION = array_merge($_SESSION, $user->toSessionData()); // zapisujemy dane uytkownika w sesji
 
         $url = "http://$_SERVER[HTTP_HOST]";
-        header("Location: {$url}/dashboard");
+        header("Location: {$url}/roulette"); // zakładamy, że dashboard to strona po zalogowaniu
     }
     #[AllowedMethods(['POST', 'GET'])]
     public function register() {
@@ -57,26 +57,28 @@ class SecurityController extends AppController {
             return $this->render('register', ['messages' => ['Passwords should be the same!']]);
         }
 
-        $existingUser = UserDefinition::findByEmail($email);
+        $existingUser = UserDefinition::findByEmail($email); // sprawdzamy, czy uzytkownik juz istnieje
 
         if ($existingUser) {
             return $this->render('register', ['messages' => ['User with this email already exists!']]);
         }
 
-        $hashedPassword = password_hash($password1, PASSWORD_BCRYPT);
+        $hashedPassword = password_hash($password1, PASSWORD_BCRYPT); // hashowanie hasła BCRYPT
 
-        $initialBalance = 1000;
+        $initialBalance = 1000; // ustalamy początkowy balans dla nowego uzytkownika
+        $default_role = 'user';
 
+        # tworzymy nowego uzytkownika przez userDefinition(model) 
         UserDefinition::create(
             $email,
             $hashedPassword,
             $firstname,
             $lastname,
-            'user',
+            $default_role,
             $initialBalance
         );
 
-        return $this->render("login", ["message" => "Zarejestrowano uytkownika ".$email]);
+        return $this->render("login", ["message" => "Zarejestrowano uzytkownika ".$email]);
     }
 
     public function logout()
@@ -89,7 +91,7 @@ class SecurityController extends AppController {
         // czyścimy wszystkie dane sesji
         $_SESSION = [];
 
-        // opcjonalnie, kasujemy ciasteczko sesji po stronie przeglądarki
+        // kasujemy ciasteczko sesji po stronie przeglądarki
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(
@@ -103,7 +105,7 @@ class SecurityController extends AppController {
             );
         }
 
-        // niszczymy sesję
+        // niszczymy sesję po stronie serwera
         session_destroy();
 
         // przekierowanie np. na ekran logowania

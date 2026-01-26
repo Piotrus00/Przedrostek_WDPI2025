@@ -16,6 +16,7 @@ class UpgradeDefinition
         public int $maxLevel
     ) {}
 
+    # funkcja statyczna tworząca obiekt z tablicy asocjacyjnej
     public static function fromArray(array $data): self
     {
         return new self(
@@ -27,13 +28,16 @@ class UpgradeDefinition
         );
     }
 
+    # funkcja statyczna pobierająca wszystkie definicje ulepszeń z repozytorium
     public static function fetchAll(): array
     {
-        $repository = new UpgradesRepository();
-        $rows = $repository->getDefinitions();
-        return array_map(static fn(array $row): self => self::fromArray($row), $rows);
+        $repository = new UpgradesRepository(); // tworzenie instancji repozytorium
+        $rows = $repository->getDefinitions(); // np.['id'=>1, 'title'=>'cos', 'base_cost'=>100, 'max_level'=>5],
+        return array_map(static fn(array $row): self => self::fromArray($row), $rows); // mapowanie wierszy na obiekty UpgradeDefinition
+        # bierzemy tablice z rows -> przekazujemy do fromArray -> tworzymy obiekt UpgradeDefinition
     }
 
+    # funkcja statyczna wyszukująca definicję ulepszenia po ID
     public static function findById(int $upgradeId): ?self
     {
         foreach (self::fetchAll() as $definition) {
@@ -45,11 +49,13 @@ class UpgradeDefinition
         return null;
     }
 
+    # funkcja obliczająca koszt następnego poziomu ulepszenia
     public function nextCost(int $currentLevel): int
     {
         return $this->baseCost * ($currentLevel + 1);
     }
 
+    # funkcja obliczająca całkowity koszt do osiągnięcia określonego poziomu(statistics)
     public function totalCostForLevel(int $level): int
     {
         if ($level <= 0) {
@@ -58,7 +64,8 @@ class UpgradeDefinition
 
         return (int) ($this->baseCost * ($level * ($level + 1) / 2));
     }
-
+    
+    # funkcja konwertująca obiekt na tablicę asocjacyjną
     public function toArray(): array
     {
         return [

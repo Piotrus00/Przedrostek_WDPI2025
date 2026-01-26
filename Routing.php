@@ -1,12 +1,10 @@
 <?php
 
 require_once 'src/controllers/SecurityController.php';
-require_once 'src/controllers/DashboardController.php';
 require_once 'src/controllers/RouletteController.php';
 require_once 'src/controllers/StatisticsController.php';
 require_once 'src/controllers/UpgradesController.php';
 require_once 'src/controllers/AdminPanelController.php';
-require_once 'src/controllers/BalanceController.php';
 require_once 'src/middleware/checkRequestAllowed.php';
 require_once 'src/middleware/checkAuthRequirements.php';
 
@@ -21,10 +19,6 @@ class Routing
             'controller' => 'SecurityController',
             'action' => 'register'
         ],
-        'dashboard' => [
-            'controller' => 'DashboardController',
-            'action' => 'index'
-        ],
         'roulette' => [
             'controller' => 'RouletteController',
             'action' => 'index'
@@ -32,10 +26,6 @@ class Routing
         'api/roulette' => [
             'controller' => 'RouletteController',
             'action' => 'gameApi'
-        ],
-        'api/balance' => [
-            'controller' => 'BalanceController',
-            'action' => 'balanceApi'
         ],
         'api/upgrades' => [
             'controller' => 'UpgradesController',

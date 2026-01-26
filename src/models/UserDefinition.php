@@ -42,6 +42,7 @@ class UserDefinition
         return self::fromArray($row);
     }
 
+    # tworzenie uzytkownika
     public static function create(
         string $email,
         string $hashedPassword,
@@ -50,8 +51,8 @@ class UserDefinition
         string $role = 'user',
         int $balance = 1000
     ): void {
-        $repository = new UserRepository();
-        $repository->createUser($email, $hashedPassword, $firstName, $lastName, $role, $balance);
+        $repository = new UserRepository(); // tworzenie instancji repozytorium
+        $repository->createUser($email, $hashedPassword, $firstName, $lastName, $role, $balance); // wywołanie metody tworzącej użytkownika(repozytorium)
     }
 
     public static function getBalanceById(int $userId): int
@@ -62,10 +63,11 @@ class UserDefinition
 
     public static function updateBalance(int $userId, int $newBalance): void
     {
-        $repository = new UserRepository();
-        $repository->updateUserBalance($userId, $newBalance);
+        $repository = new UserRepository(); // tworzenie instancji repozytorium
+        $repository->updateUserBalance($userId, $newBalance); // wywołanie metody aktualizującej saldo użytkownika(repozytorium)
     }
 
+    # do _SESSION
     public function toSessionData(): array
     {
         return [

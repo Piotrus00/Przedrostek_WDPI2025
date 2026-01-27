@@ -27,6 +27,7 @@ class UserRepository extends Repository
             INSERT INTO users (email, password, firstname, lastname, balance, role) VALUES (?,?,?,?,?,?);
             ');
             $stmt->execute([$email, $hashedPassword, $firstName, $lastName, $balance, $role]);
+            // Insert odpowiedzialny za tworzenie użytkownika (SecurityController::register)
 
             $connection->commit();
         } catch (Throwable $e) {
@@ -71,6 +72,32 @@ class UserRepository extends Repository
             UPDATE users SET balance = :balance WHERE id = :id
         ');
         $stmt->bindParam(':balance', $newBalance, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    public function getUserEnabledById(int $userId): bool
+    {
+        $stmt = $this->database->connect()->prepare('
+            SELECT enabled FROM users WHERE id = :id
+        ');
+        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return false;
+        }
+
+        return (bool) $row['enabled'];
+    }
+
+    public function updateUserEnabled(int $userId, bool $enabled): void
+    {
+        $stmt = $this->database->connect()->prepare('
+            UPDATE users SET enabled = :enabled WHERE id = :id
+        ');
+        $stmt->bindParam(':enabled', $enabled, PDO::PARAM_BOOL);
         $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
         $stmt->execute();
     }

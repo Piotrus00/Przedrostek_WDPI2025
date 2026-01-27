@@ -21,6 +21,7 @@ class StatisticsRepository extends Repository
         $stmt->bindParam(':result_number', $resultNumber, PDO::PARAM_INT);
         $stmt->bindParam(':result_color', $resultColor, PDO::PARAM_STR);
         $stmt->execute();
+        // Insert odpowiedzialny za log gry ruletki (RouletteController::gameApi)
     }
 
 public function getUserGameStats(int $userId): array

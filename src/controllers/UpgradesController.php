@@ -47,6 +47,12 @@ class UpgradesController extends AppController
             return;
         }
 
+        if (!UserDefinition::getEnabledById((int) $userId)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Account disabled']);
+            return;
+        }
+
         $definitions = $this->getUpgradesDefinition();  // Pobiera definicje wszystkich ulepszeń
         $levels = $this->getUserUpgrades((int) $userId); // Pobiera poziomy ulepszeń użytkownika
 

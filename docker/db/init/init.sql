@@ -8,8 +8,8 @@ CREATE TABLE users (
                        password VARCHAR(255) NOT NULL,
                        balance INTEGER NOT NULL DEFAULT 1000,
                        role VARCHAR(20) NOT NULL DEFAULT 'user',
-                       bio TEXT,
-                       enabled BOOLEAN DEFAULT TRUE
+                       enabled BOOLEAN DEFAULT TRUE,
+                       created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE upgrades (
@@ -37,6 +37,33 @@ CREATE TABLE roulette_games (
                                 created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE login_attempts (
+                                id SERIAL PRIMARY KEY,
+                                email VARCHAR(150),
+                                ip_address VARCHAR(45) NOT NULL,
+                                success BOOLEAN NOT NULL DEFAULT FALSE,
+                                attempted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                                blocked_until TIMESTAMP NULL
+);
+
+
+-- FUNKCJE I TRIGGERS
+-- Funkcja do ustawiania created_at przy wstawianiu nowego użytkownika
+CREATE OR REPLACE FUNCTION set_user_created_at() RETURNS trigger AS $$
+BEGIN
+    IF NEW.created_at IS NULL THEN
+        NEW.created_at = NOW();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger wywołujący funkcję przed wstawieniem rekordu do tabeli users
+CREATE TRIGGER trg_users_created_at
+BEFORE INSERT ON users
+FOR EACH ROW
+EXECUTE FUNCTION set_user_created_at();
+
 -- WIDOKI
 -- COALESCE użyte, aby uniknąć wartości NULL w wynikach agregacji
 CREATE VIEW v_user_game_stats AS
@@ -56,27 +83,44 @@ SELECT
 FROM roulette_games
 GROUP BY user_id;
 
+CREATE VIEW v_login_attempt_stats AS
+SELECT
+    email,
+    ip_address,
+    COUNT(*) FILTER (WHERE success = FALSE AND attempted_at > NOW() - INTERVAL '1 hour') AS failed_last_hour,
+    MAX(attempted_at) AS last_attempt_at,
+    MAX(blocked_until) AS blocked_until
+FROM login_attempts
+GROUP BY email, ip_address;
+
+CREATE VIEW v_login_attempts_recent AS
+SELECT id, email, ip_address, success, attempted_at, blocked_until
+FROM login_attempts
+ORDER BY attempted_at DESC;
+
+
+
+
+
 -- POCZĄTKOWE DANE
-INSERT INTO users (firstname, lastname, email, password, balance, role, bio, enabled)
+INSERT INTO users (firstname, lastname, email, password, balance, role, enabled)
 VALUES (
     'Test',
     'User',
     'test.user@example.com',
-    '$2y$10$HMSh7s6x2P1nRMBKtgwYoe2z4OXbNURQhRpVjZwt6EXOVliuTIYIS',
+    '$2y$10$.0Coc4MVIUF5p3MM3y4nje1HvGQ/sBEAWzByCrMafjX5CfErG5Rsy',
     1000,
     'user',
-    'Użytkownik testowy do logowania.',
     TRUE
 );
-INSERT INTO users (firstname, lastname, email, password, balance, role, bio, enabled)
+INSERT INTO users (firstname, lastname, email, password, balance, role, enabled)
 VALUES (
     'Admin',
     'User',
     'admin@example.com',
-    '$2y$10$HMSh7s6x2P1nRMBKtgwYoe2z4OXbNURQhRpVjZwt6EXOVliuTIYIS',
+    '$2y$10$.0Coc4MVIUF5p3MM3y4nje1HvGQ/sBEAWzByCrMafjX5CfErG5Rsy',
     500000,
     'admin',
-    'Konto administratora.',
     TRUE
 );
 

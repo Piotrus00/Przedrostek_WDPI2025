@@ -47,5 +47,6 @@ class UpgradesRepository extends Repository
         $stmt->bindParam(':upgrade_id', $upgradeId, PDO::PARAM_INT);
         $stmt->bindParam(':level', $level, PDO::PARAM_INT);
         $stmt->execute();
+        // Insert odpowiedzialny za zapis poziomu ulepszenia (UpgradesController::upgradesApi)
     }
 }

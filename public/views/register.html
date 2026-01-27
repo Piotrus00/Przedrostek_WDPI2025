@@ -17,9 +17,10 @@
     </p>
     <?php endforeach; ?>
     <?php endif;?>
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES); ?>">
     <input name="email" type="email" placeholder="Podaj email">
-    <input name="password1" type="password" placeholder="Podaj hasło">
-    <input name="password2" type="password" placeholder="Powrtórz hasło">
+    <input name="password1" type="password" placeholder="Podaj hasło" minlength="8" maxlength="64">
+    <input name="password2" type="password" placeholder="Powrtórz hasło" minlength="8" maxlength="64">
 
 
     <input name="firstname" type="text" placeholder="Podaj imie">

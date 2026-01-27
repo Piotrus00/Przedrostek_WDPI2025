@@ -67,6 +67,18 @@ class UserDefinition
         $repository->updateUserBalance($userId, $newBalance); // wywołanie metody aktualizującej saldo użytkownika(repozytorium)
     }
 
+    public static function getEnabledById(int $userId): bool
+    {
+        $repository = new UserRepository();
+        return $repository->getUserEnabledById($userId);
+    }
+
+    public static function setEnabled(int $userId, bool $enabled): void
+    {
+        $repository = new UserRepository();
+        $repository->updateUserEnabled($userId, $enabled);
+    }
+
     # do _SESSION
     public function toSessionData(): array
     {

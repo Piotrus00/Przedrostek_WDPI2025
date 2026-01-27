@@ -47,6 +47,10 @@ class Routing
             'controller' => 'AdminPanelController',
             'action' => 'index'
         ],
+        'api/admin' => [
+            'controller' => 'AdminPanelController',
+            'action' => 'adminApi'
+        ],
         'logout' => [
             'controller' => 'SecurityController',
             'action' => 'logout'

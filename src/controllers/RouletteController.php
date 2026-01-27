@@ -35,6 +35,15 @@ class RouletteController extends AppController
 				throw new Exception('Not logged in');
 			}
 
+			if (!UserDefinition::getEnabledById((int) $userId)) {
+				http_response_code(403);
+				echo json_encode([
+					'success' => false,
+					'error' => 'Account disabled'
+				]);
+				exit;
+			}
+
 			$rawInput = file_get_contents('php://input');
 			$input = json_decode($rawInput, true);
 

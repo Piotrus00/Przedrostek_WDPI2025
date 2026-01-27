@@ -1,0 +1,138 @@
+.admin-page {
+    position: relative;
+    z-index: 10;
+    padding: 24px 16px 60px;
+    font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.admin-header {
+    padding: 24px;
+    background: rgba(14, 2, 3, 0.9);
+    border-radius: 20px;
+    border: 1px solid rgba(170, 60, 60, 0.25);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    color: #f0dede;
+}
+
+.admin-header h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+}
+
+.admin-header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.admin-card {
+    background: rgba(14, 2, 3, 0.9);
+    border-radius: 20px;
+    border: 1px solid rgba(170, 60, 60, 0.25);
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    color: #f0dede;
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.card-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.admin-table thead {
+    background: rgba(30, 10, 10, 0.8);
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 14px;
+}
+
+.admin-table th {
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 12px;
+}
+
+.table-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.status-pill.success {
+    background: rgba(20, 120, 60, 0.3);
+    color: #8ef0b6;
+}
+
+.status-pill.fail {
+    background: rgba(160, 35, 35, 0.3);
+    color: #ffb4b4;
+}
+
+.admin-action-btn {
+    background: rgba(170, 60, 60, 0.25);
+    border: 1px solid rgba(255, 94, 94, 0.5);
+    color: #f0dede;
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.admin-action-btn:hover {
+    background: rgba(255, 94, 94, 0.35);
+}
+
+@media (max-width: 900px) {
+    .admin-header h1 {
+        font-size: 26px;
+    }
+
+    .admin-card {
+        padding: 18px;
+    }
+}

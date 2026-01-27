@@ -3,84 +3,74 @@
 require_once 'AppController.php';
 require_once __DIR__ . '/../models/UserDefinition.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
+require_once __DIR__ . '/../repository/LoginAttemptsRepository.php';
 
 use App\Models\UserDefinition;
 class SecurityController extends AppController {
+
+    private LoginAttemptsRepository $loginAttemptsRepository;
 
     private const MAX_LOGIN_ATTEMPTS = 5;
     private const LOGIN_BLOCK_SECONDS = 3600;
     private const PASSWORD_MIN_LENGTH = 8;
     private const PASSWORD_MAX_LENGTH = 64;
-    private const GENERIC_INVALID_MESSAGE = 'Invalid Password or Email';
+    private const GENERIC_INVALID_MESSAGE = 'Invalid Password or Email'; # Nie zdradzam, cz email istnieje...
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->loginAttemptsRepository = new LoginAttemptsRepository();
+    }
+
+    #validacja formatu emaila po stronie serwera
     private function isValidEmail(string $email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
 
+    #validacja zlozonosci hasła
     private function isValidPassword(string $password): bool
     {
         if (strlen($password) < self::PASSWORD_MIN_LENGTH || strlen($password) > self::PASSWORD_MAX_LENGTH) {
             return false;
         }
 
-        $hasNumber = (bool) preg_match('/\d/', $password);
-        $hasSymbol = (bool) preg_match('/[^a-zA-Z0-9]/', $password);
+        $hasNumber = (bool) preg_match('/\d/', $password); // przynajmniej jedna cyfra
+        $hasSymbol = (bool) preg_match('/[^a-zA-Z0-9]/', $password); // przynajmniej jeden znak specjalny
 
         return $hasNumber && $hasSymbol;
     }
 
-    private function getLoginAttemptKey(string $email): string
+    # limit prob logowania
+    private function getClientIp(): string
     {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        return strtolower(trim($email)) . '|' . $ip;
+        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     }
 
-    private function getLoginAttemptData(string $key): array
+    private function isLoginBlocked(string $email, string $ipAddress): bool
     {
-        if (!isset($_SESSION['login_attempts'][$key])) {
-            return ['count' => 0, 'blocked_until' => 0];
+        $blockedUntil = $this->loginAttemptsRepository->getActiveBlock($email, $ipAddress);
+        if (!$blockedUntil) {
+            return false;
         }
 
-        return $_SESSION['login_attempts'][$key];
+        return strtotime($blockedUntil) > time();
     }
 
-    private function setLoginAttemptData(string $key, array $data): void
+    private function recordFailedLogin(string $email, string $ipAddress): ?string
     {
-        if (!isset($_SESSION['login_attempts'])) {
-            $_SESSION['login_attempts'] = [];
-        }
-        $_SESSION['login_attempts'][$key] = $data;
-    }
+        $recentFailures = $this->loginAttemptsRepository->countRecentFailures(
+            $email,
+            $ipAddress,
+            self::LOGIN_BLOCK_SECONDS
+        );
 
-    private function isLoginBlocked(string $key): bool
-    {
-        $data = $this->getLoginAttemptData($key);
-        return !empty($data['blocked_until']) && $data['blocked_until'] > time();
-    }
+        $shouldBlock = ($recentFailures + 1) >= self::MAX_LOGIN_ATTEMPTS;
+        $blockedUntil = $shouldBlock ? date('Y-m-d H:i:s', time() + self::LOGIN_BLOCK_SECONDS) : null;
 
-    private function recordFailedLogin(string $key): void
-    {
-        $data = $this->getLoginAttemptData($key);
-        $count = (int) ($data['count'] ?? 0) + 1;
-        $blockedUntil = (int) ($data['blocked_until'] ?? 0);
+        $this->loginAttemptsRepository->logAttempt($email, $ipAddress, false, $blockedUntil);
 
-        if ($count >= self::MAX_LOGIN_ATTEMPTS) {
-            $blockedUntil = time() + self::LOGIN_BLOCK_SECONDS;
-            $count = 0;
-        }
-
-        $this->setLoginAttemptData($key, [
-            'count' => $count,
-            'blocked_until' => $blockedUntil
-        ]);
-    }
-
-    private function clearFailedLogins(string $key): void
-    {
-        if (isset($_SESSION['login_attempts'][$key])) {
-            unset($_SESSION['login_attempts'][$key]);
-        }
+        return $blockedUntil;
     }
 
     #[AllowedMethods(['POST', 'GET'])]
@@ -95,6 +85,8 @@ class SecurityController extends AppController {
         $email = $_POST["email"] ?? '';
         $password = $_POST["password"] ?? '';
         $csrfToken = $_POST['csrf_token'] ?? '';
+        $emailNormalized = strtolower(trim($email));
+        $ipAddress = $this->getClientIp();
 
         if (!$this->verifyCsrfToken($csrfToken)) {
             return $this->render("login", [
@@ -103,8 +95,7 @@ class SecurityController extends AppController {
             ]);
         }
 
-        $attemptKey = $this->getLoginAttemptKey($email);
-        if ($this->isLoginBlocked($attemptKey)) {
+        if ($this->isLoginBlocked($emailNormalized, $ipAddress)) {
             return $this->render("login", [
                 "messages" => ["Too many login attempts. Try again later."],
                 'csrfToken' => $this->getCsrfToken()
@@ -112,7 +103,13 @@ class SecurityController extends AppController {
         }
 
         if(empty($email) || empty($password)) {
-            $this->recordFailedLogin($attemptKey);
+            $blockedUntil = $this->recordFailedLogin($emailNormalized, $ipAddress);
+            if ($blockedUntil) {
+                return $this->render("login", [
+                    "messages" => ["Too many login attempts. Try again later."],
+                    'csrfToken' => $this->getCsrfToken()
+                ]);
+            }
             return $this->render("login", [
                 "messages" => [self::GENERIC_INVALID_MESSAGE],
                 'csrfToken' => $this->getCsrfToken()
@@ -120,7 +117,13 @@ class SecurityController extends AppController {
         }
 
         if (!$this->isValidEmail($email)) {
-            $this->recordFailedLogin($attemptKey);
+            $blockedUntil = $this->recordFailedLogin($emailNormalized, $ipAddress);
+            if ($blockedUntil) {
+                return $this->render("login", [
+                    "messages" => ["Too many login attempts. Try again later."],
+                    'csrfToken' => $this->getCsrfToken()
+                ]);
+            }
             return $this->render("login", [
                 "messages" => [self::GENERIC_INVALID_MESSAGE],
                 'csrfToken' => $this->getCsrfToken()
@@ -130,7 +133,13 @@ class SecurityController extends AppController {
         $user = UserDefinition::findByEmail($email); // szukamy uytkownika o podanym emailu
 
         if(!$user){
-            $this->recordFailedLogin($attemptKey);
+            $blockedUntil = $this->recordFailedLogin($emailNormalized, $ipAddress);
+            if ($blockedUntil) {
+                return $this->render("login", [
+                    "messages" => ["Too many login attempts. Try again later."],
+                    'csrfToken' => $this->getCsrfToken()
+                ]);
+            }
             return $this->render("login", [
                 "messages" => [self::GENERIC_INVALID_MESSAGE],
                 'csrfToken' => $this->getCsrfToken()
@@ -138,7 +147,13 @@ class SecurityController extends AppController {
 
         }
        if(!password_verify($password, $user->password)){
-           $this->recordFailedLogin($attemptKey);
+           $blockedUntil = $this->recordFailedLogin($emailNormalized, $ipAddress);
+           if ($blockedUntil) {
+               return $this->render("login", [
+                   "messages" => ["Too many login attempts. Try again later."],
+                   'csrfToken' => $this->getCsrfToken()
+               ]);
+           }
            return $this->render("login", [
                "messages" => [self::GENERIC_INVALID_MESSAGE],
                'csrfToken' => $this->getCsrfToken()
@@ -146,7 +161,7 @@ class SecurityController extends AppController {
        }
 
         $_SESSION = array_merge($_SESSION, $user->toSessionData()); // zapisujemy dane uytkownika w sesji
-        $this->clearFailedLogins($attemptKey);
+        $this->loginAttemptsRepository->logAttempt($emailNormalized, $ipAddress, true, null); // logujemy udane logowanie
 
         $url = "http://$_SERVER[HTTP_HOST]";
         header("Location: {$url}/roulette"); // zakładamy, że dashboard to strona po zalogowaniu

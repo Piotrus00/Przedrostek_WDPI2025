@@ -12,6 +12,11 @@ CREATE TABLE users (
                        created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE earnings (
+                          user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+                          last_claimed TIMESTAMP NULL
+);
+
 CREATE TABLE upgrades (
                            id SERIAL PRIMARY KEY,
                            title VARCHAR(100) NOT NULL,
@@ -58,11 +63,33 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Funkcja do tworzenia rekordu earnings dla nowego użytkownika
+CREATE OR REPLACE FUNCTION create_user_earnings() RETURNS trigger AS $$
+BEGIN
+    INSERT INTO earnings (user_id, last_claimed) VALUES (NEW.id, NULL);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Trigger wywołujący funkcję przed wstawieniem rekordu do tabeli users
 CREATE TRIGGER trg_users_created_at
 BEFORE INSERT ON users
 FOR EACH ROW
 EXECUTE FUNCTION set_user_created_at();
+
+-- Trigger wywołujący tworzenie rekordu earnings po utworzeniu użytkownika
+CREATE TRIGGER trg_users_earnings
+AFTER INSERT ON users
+FOR EACH ROW
+EXECUTE FUNCTION create_user_earnings();
+
+-- Funkcja obliczająca łączny koszt ulepszeń użytkownika
+CREATE OR REPLACE FUNCTION total_upgrades_cost(p_user_id INT) RETURNS INT AS $$
+    SELECT COALESCE(SUM(u.base_cost * (uu.level * (uu.level + 1) / 2)), 0)
+    FROM user_upgrades uu
+    JOIN upgrades u ON u.id = uu.upgrade_id
+    WHERE uu.user_id = p_user_id;
+$$ LANGUAGE SQL;
 
 -- WIDOKI
 -- COALESCE użyte, aby uniknąć wartości NULL w wynikach agregacji
@@ -109,7 +136,7 @@ VALUES (
     'User',
     'test.user@example.com',
     '$2y$10$.0Coc4MVIUF5p3MM3y4nje1HvGQ/sBEAWzByCrMafjX5CfErG5Rsy',
-    1000,
+    300,
     'user',
     TRUE
 );
@@ -128,8 +155,9 @@ INSERT INTO upgrades (id, title, description, base_cost, max_level) VALUES
     (1, 'Additional 7', '2x 7 chances', 20, 5),
     (2, 'Black Multiplier', '+0.2x multiplier', 100, 5),
     (3, 'Red Multiplier', '+0.2x multiplier', 100, 5),
-    (4, 'Green Multiplier', '2x multiplier', 100, 5),
-    (5, 'Lucky Green', '2x green chance', 75, 4),
+    (4, 'Green Multiplier', '+1 multiplier', 100, 5),
+    (5, 'Lucky Green', '2x green chance', 1, 50),
     (6, 'Refund', '1% refund chance', 250, 5),
-    (7, 'More Money', '+0.1x more money', 500, 10);
+    (7, 'More Money2', '+0.1x more money', 500, 10);
+
 

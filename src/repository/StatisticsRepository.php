@@ -48,4 +48,16 @@ public function getUserGameStats(int $userId): array
     ];
 }
 
+    public function getTotalUpgradesCost(int $userId): int
+    {
+        $stmt = $this->database->connect()->prepare('
+            SELECT total_upgrades_cost(:user_id) AS total_cost
+        ');
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? (int) $row['total_cost'] : 0;
+    }
+
 }

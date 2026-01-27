@@ -52,7 +52,8 @@ class StatisticsController extends AppController
 
         $totalMaxLevels = 0;
         $totalBoughtLevels = 0;
-        $totalSpent = 0;
+
+        $totalSpent = $this->statisticsRepository->getTotalUpgradesCost((int) $userId);
 
         # przypisanie statystyk ulepszeń
         foreach ($definitions as $def) {
@@ -62,7 +63,6 @@ class StatisticsController extends AppController
 
             $totalMaxLevels += $maxLevel;
             $totalBoughtLevels += $level;
-            $totalSpent += $def->totalCostForLevel($level);
         }
 
         $remainingUpgrades = max(0, $totalMaxLevels - $totalBoughtLevels); // pozostałe ulepszenia do kupienia
@@ -89,9 +89,9 @@ class StatisticsController extends AppController
                 'boughtUpgrades' => $totalBoughtLevels,
                 'remainingUpgrades' => $remainingUpgrades,
                 'totalSpent' => (int) $totalSpent,
-                'greenMultiplier' => 1 + $greenLevel,
-                'redMultiplier' => round(1 + (0.2 * $redLevel), 1),
-                'blackMultiplier' => round(1 + (0.2 * $blackLevel), 1),
+                'greenMultiplier' => 36 + $greenLevel,
+                'redMultiplier' => round(2 + (0.2 * $redLevel), 1),
+                'blackMultiplier' => round(2 + (0.2 * $blackLevel), 1),
                 'greenChance' => 1 + $luckyGreenLevel,
             ],
             'other' => [

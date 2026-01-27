@@ -4,11 +4,13 @@ require_once 'AppController.php';
 require_once __DIR__ . '/../models/UserDefinition.php';
 require_once __DIR__ . '/../annotation/AllowedMethods.php';
 require_once __DIR__ . '/../repository/LoginAttemptsRepository.php';
+require_once __DIR__ . '/../repository/EarningsRepository.php';
 
 use App\Models\UserDefinition;
 class SecurityController extends AppController {
 
     private LoginAttemptsRepository $loginAttemptsRepository;
+    private EarningsRepository $earningsRepository;
 
     private const MAX_LOGIN_ATTEMPTS = 5;
     private const LOGIN_BLOCK_SECONDS = 3600;
@@ -20,6 +22,7 @@ class SecurityController extends AppController {
     {
         parent::__construct();
         $this->loginAttemptsRepository = new LoginAttemptsRepository();
+        $this->earningsRepository = new EarningsRepository();
     }
 
     #validacja formatu emaila po stronie serwera
@@ -163,6 +166,11 @@ class SecurityController extends AppController {
         session_regenerate_id(true);
         $_SESSION = array_merge($_SESSION, $user->toSessionData()); // zapisujemy dane uytkownika w sesji
         $this->loginAttemptsRepository->logAttempt($emailNormalized, $ipAddress, true, null); // logujemy udane logowanie
+
+        $earnedBalance = $this->earningsRepository->applyDailyEarning((int) $user->id);
+        if ($earnedBalance !== null) {
+            $_SESSION['user_balance'] = $earnedBalance;
+        }
 
         $url = "http://$_SERVER[HTTP_HOST]";
         header("Location: {$url}/roulette"); // zakładamy, że dashboard to strona po zalogowaniu

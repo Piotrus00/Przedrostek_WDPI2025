@@ -160,6 +160,7 @@ class SecurityController extends AppController {
            ]); // niepoprawne hasło
        }
 
+        session_regenerate_id(true);
         $_SESSION = array_merge($_SESSION, $user->toSessionData()); // zapisujemy dane uytkownika w sesji
         $this->loginAttemptsRepository->logAttempt($emailNormalized, $ipAddress, true, null); // logujemy udane logowanie
 

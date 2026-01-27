@@ -17,9 +17,8 @@ catch (\Exception $e) {
         exit;
     }
     if ($e->getCode() === 401) {
-        // Obsługa błędu braku logowania
-        header("Location: /login"); // Przekierowanie do logowania
-        var_dump($e->getMessage());
+        http_response_code(401);
+        include 'public/views/401.html';
         exit;
     }
     if ($e->getCode() === 403) {
@@ -27,8 +26,14 @@ catch (\Exception $e) {
         include 'public/views/403.html';
         exit;
     }
+    if ($e->getCode() === 400) {
+        http_response_code(400);
+        include 'public/views/400.html';
+        exit;
+    }
 
     http_response_code(500);
-    echo "Wystąpił błąd serwera.";
-}
+        include 'public/views/500.html';
+        exit;
+    }
     ?>

@@ -12,46 +12,5 @@
             "username": "docker"
         }
     ],
-    "folder-color.pathColors": [
-        {
-            "folderPath": "Przedrostek_WDPI2025\\src\\annotation\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\src\\middleware\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\public\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\docker\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\Routing.php\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\index.php\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\docker-compose.yaml\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\database.php\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\.env\\",
-            "color": "foldercolorizer.color_00cc00"
-        },
-        {
-            "folderPath": "Przedrostek_WDPI2025\\src\\patterns\\",
-            "color": "foldercolorizer.color_00cc00"
-        }
-    ]
+    "folder-color.pathColors": []
 }

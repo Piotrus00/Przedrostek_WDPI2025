@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-
-    <link rel="stylesheet" type="text/css" href="public/styles/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Not Found</title>
+    <link rel="stylesheet" type="text/css" href="/public/styles/error.css">
 </head>
-<body>
-    <h1>404 - Strona nie znaleziona</h1>
-    <p>Przepraszamy, ale strona, której szukasz, nie istnieje.</p>
-    <a href="/roulette">Wróć do dashboardu</a>
+<body class="error-page">
+    <main class="error-card">
+        <h1 class="error-title">404 - Not Found</h1>
+        <p class="error-message">Przepraszamy, ale strona, której szukasz, nie istnieje.</p>
+        <div class="error-actions">
+            <a class="auth-link" href="/roulette">Wróć do dashboardu</a>
+            <a class="auth-link" href="/login">Zaloguj się</a>
+        </div>
+    </main>
 </body>
 </html>

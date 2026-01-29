@@ -48,17 +48,4 @@ class AdminRepository extends Repository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
-
-    public function getRecentLoginAttempts(int $limit = 50): array
-    {
-        $stmt = $this->database->connect()->prepare('
-            SELECT id, email, ip_address, success, attempted_at, blocked_until
-            FROM v_login_attempts_recent
-            LIMIT :limit
-        ');
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    }
 }

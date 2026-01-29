@@ -7,12 +7,10 @@ const updateBalanceDisplay = (balance) => {
 
 window.updateBalanceDisplay = updateBalanceDisplay;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const burger = document.querySelector('.burger');
-    const navItems = document.querySelector('.nav-items');
+const burger = document.querySelector('.burger');
+const navItems = document.querySelector('.nav-items');
 
-    if (!burger || !navItems) return;
-
+if (burger && navItems) {
     burger.addEventListener('click', () => {
         navItems.classList.toggle('active');
     });
@@ -22,4 +20,4 @@ document.addEventListener('DOMContentLoaded', () => {
             navItems.classList.remove('active');
         });
     });
-});
+}

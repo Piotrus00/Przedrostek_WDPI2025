@@ -90,11 +90,11 @@ const loadAdminData = async () => {
           const deleteResponse = await fetch('/api/admin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'delete-user',
-              userId,
-              csrf_token: csrfToken
-            })
+              body: JSON.stringify({
+                action: 'delete-user',
+                userId,
+                csrf: csrfToken
+              })
           });
           const deleteData = await deleteResponse.json();
           if (!deleteData || !deleteData.success) {
@@ -119,12 +119,12 @@ const loadAdminData = async () => {
           const toggleResponse = await fetch('/api/admin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'set-enabled',
-              userId,
-              enabled: nextEnabled,
-              csrf_token: csrfToken
-            })
+              body: JSON.stringify({
+                action: 'set-enabled',
+                userId,
+                enabled: nextEnabled,
+                csrf: csrfToken
+              })
           });
           const toggleData = await toggleResponse.json();
           if (!toggleData || !toggleData.success) {

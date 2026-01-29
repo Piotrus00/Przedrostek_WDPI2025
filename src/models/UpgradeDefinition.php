@@ -37,32 +37,10 @@ class UpgradeDefinition
         # bierzemy tablice z rows -> przekazujemy do fromArray -> tworzymy obiekt UpgradeDefinition
     }
 
-    # funkcja statyczna wyszukująca definicję ulepszenia po ID
-    public static function findById(int $upgradeId): ?self
-    {
-        foreach (self::fetchAll() as $definition) {
-            if ($definition->id === $upgradeId) {
-                return $definition;
-            }
-        }
-
-        return null;
-    }
-
     # funkcja obliczająca koszt następnego poziomu ulepszenia
     public function nextCost(int $currentLevel): int
     {
         return $this->baseCost * ($currentLevel + 1);
-    }
-
-    # funkcja obliczająca całkowity koszt do osiągnięcia określonego poziomu(statistics)
-    public function totalCostForLevel(int $level): int
-    {
-        if ($level <= 0) {
-            return 0;
-        }
-
-        return (int) ($this->baseCost * ($level * ($level + 1) / 2));
     }
     
     # funkcja konwertująca obiekt na tablicę asocjacyjną

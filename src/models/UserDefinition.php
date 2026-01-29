@@ -73,12 +73,6 @@ class UserDefinition
         return $repository->getUserEnabledById($userId);
     }
 
-    public static function setEnabled(int $userId, bool $enabled): void
-    {
-        $repository = new UserRepository();
-        $repository->updateUserEnabled($userId, $enabled);
-    }
-
     # do _SESSION
     public function toSessionData(): array
     {

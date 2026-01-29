@@ -4,19 +4,6 @@ require_once 'Repository.php';
 
 class UserRepository extends Repository
 {
-
-    public function getUser(): ?array
-    {
-        $stmt = $this->database->connect()->prepare('
-            SELECT * FROM "users" 
-        ');
-        $stmt->execute();
-
-        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $users;
-    }
-
     #transkacja
     public function createUser(string $email, string $hashedPassword, string $firstName, string $lastName, string $role = 'user', int $balance = 1000 ): void{
         $connection = $this->database->connect();

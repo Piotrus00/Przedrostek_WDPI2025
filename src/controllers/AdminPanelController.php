@@ -46,7 +46,7 @@ class AdminPanelController extends AppController
             return;
         }
 
-        $csrfToken = $input['csrf_token'] ?? '';
+        $csrfToken = $input['csrf'] ?? '';
         if (!$this->verifyCsrfToken($csrfToken)) {
             http_response_code(403);
             echo json_encode(['success' => false, 'error' => 'Invalid request']);

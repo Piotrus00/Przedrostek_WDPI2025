@@ -8,11 +8,6 @@ class AppController extends Singleton
         return $_SERVER["REQUEST_METHOD"] === 'GET';
     }
 
-    protected function isPost(): bool
-    {
-        return $_SERVER["REQUEST_METHOD"] === 'POST';
-    }
-
     protected function render(string $template = null, array $variables = []) 
     {
         $templatePath = 'public/views/' . $template . '.html'; # public/views/login.html
@@ -40,11 +35,11 @@ class AppController extends Singleton
             session_start();
         }
 
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        if (empty($_SESSION['csrf'])) {
+            $_SESSION['csrf'] = bin2hex(random_bytes(32));
         }
 
-        return (string) $_SESSION['csrf_token'];
+        return (string) $_SESSION['csrf'];
     }
 
     protected function verifyCsrfToken(?string $token): bool
@@ -53,11 +48,11 @@ class AppController extends Singleton
             session_start();
         }
 
-        if (empty($_SESSION['csrf_token']) || empty($token)) {
+        if (empty($_SESSION['csrf']) || empty($token)) {
             return false;
         }
 
-        return hash_equals($_SESSION['csrf_token'], $token);
+        return hash_equals($_SESSION['csrf'], $token);
     }
 
 }

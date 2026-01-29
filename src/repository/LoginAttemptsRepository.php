@@ -43,16 +43,6 @@ class LoginAttemptsRepository extends Repository
         return $row['blocked_until'];
     }
 
-    public function isCurrentlyBlocked(string $email, string $ipAddress): bool
-    {
-        $blockedUntil = $this->getActiveBlock($email, $ipAddress);
-        if (!$blockedUntil) {
-            return false;
-        }
-
-        return strtotime($blockedUntil) > time();
-    }
-
     public function countRecentFailures(string $email, string $ipAddress, int $seconds): int
     {
         $stmt = $this->database->connect()->prepare('

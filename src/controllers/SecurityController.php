@@ -87,7 +87,7 @@ class SecurityController extends AppController {
 
         $email = $_POST["email"] ?? '';
         $password = $_POST["password"] ?? '';
-        $csrfToken = $_POST['csrf_token'] ?? '';
+        $csrfToken = $_POST['csrf'] ?? '';
         $emailNormalized = strtolower(trim($email));
         $ipAddress = $this->getClientIp();
 
@@ -189,7 +189,7 @@ class SecurityController extends AppController {
         $password2 = $_POST["password2"] ?? '';
         $firstname = $_POST["firstname"] ?? '';
         $lastname = $_POST["lastname"] ?? '';
-        $csrfToken = $_POST['csrf_token'] ?? '';
+        $csrfToken = $_POST['csrf'] ?? '';
 
         if (!$this->verifyCsrfToken($csrfToken)) {
             return $this->render("register", [

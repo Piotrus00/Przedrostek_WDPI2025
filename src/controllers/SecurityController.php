@@ -237,7 +237,7 @@ class SecurityController extends AppController {
 
         $hashedPassword = password_hash($password1, PASSWORD_BCRYPT); // hashowanie hasła BCRYPT
 
-        $initialBalance = 1000; // ustalamy początkowy balans dla nowego uzytkownika
+        $initialBalance = 300; // ustalamy początkowy balans dla nowego uzytkownika
         $default_role = 'user';
 
         # tworzymy nowego uzytkownika przez userDefinition(model) 

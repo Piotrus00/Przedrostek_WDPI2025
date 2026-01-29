@@ -8,16 +8,40 @@ class StatisticsRepository extends Repository
         int $userId,
         int $totalBet,
         int $payout,
+        int $betRedCount,
+        int $betBlackCount,
+        int $betGreenCount,
         int $resultNumber,
         string $resultColor
     ): void {
         $stmt = $this->database->connect()->prepare('
-            INSERT INTO roulette_games (user_id, total_bet, payout, result_number, result_color)
-            VALUES (:user_id, :total_bet, :payout, :result_number, :result_color)
+            INSERT INTO roulette_games (
+                user_id,
+                total_bet,
+                payout,
+                bet_red_count,
+                bet_black_count,
+                bet_green_count,
+                result_number,
+                result_color
+            )
+            VALUES (
+                :user_id,
+                :total_bet,
+                :payout,
+                :bet_red_count,
+                :bet_black_count,
+                :bet_green_count,
+                :result_number,
+                :result_color
+            )
         ');
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':total_bet', $totalBet, PDO::PARAM_INT);
         $stmt->bindParam(':payout', $payout, PDO::PARAM_INT);
+        $stmt->bindParam(':bet_red_count', $betRedCount, PDO::PARAM_INT);
+        $stmt->bindParam(':bet_black_count', $betBlackCount, PDO::PARAM_INT);
+        $stmt->bindParam(':bet_green_count', $betGreenCount, PDO::PARAM_INT);
         $stmt->bindParam(':result_number', $resultNumber, PDO::PARAM_INT);
         $stmt->bindParam(':result_color', $resultColor, PDO::PARAM_STR);
         $stmt->execute();

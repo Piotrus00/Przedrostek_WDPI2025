@@ -37,6 +37,9 @@ CREATE TABLE roulette_games (
                                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                                 total_bet INTEGER NOT NULL DEFAULT 0,
                                 payout INTEGER NOT NULL DEFAULT 0,
+                                bet_red_count INTEGER NOT NULL DEFAULT 0,
+                                bet_black_count INTEGER NOT NULL DEFAULT 0,
+                                bet_green_count INTEGER NOT NULL DEFAULT 0,
                                 result_number INTEGER NOT NULL,
                                 result_color VARCHAR(10) NOT NULL,
                                 created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -102,9 +105,9 @@ SELECT
     COALESCE(SUM(payout - total_bet), 0) AS total_net,
     COALESCE(SUM(CASE WHEN (payout - total_bet) > 0 THEN 1 ELSE 0 END), 0) AS wins,
     COALESCE(SUM(CASE WHEN (payout - total_bet) < 0 THEN 1 ELSE 0 END), 0) AS losses,
-    COALESCE(SUM(CASE WHEN result_color = 'green' THEN 1 ELSE 0 END), 0) AS green,
-    COALESCE(SUM(CASE WHEN result_color = 'red' THEN 1 ELSE 0 END), 0) AS red,
-    COALESCE(SUM(CASE WHEN result_color = 'black' THEN 1 ELSE 0 END), 0) AS black,
+    COALESCE(SUM(bet_green_count), 0) AS green,
+    COALESCE(SUM(bet_red_count), 0) AS red,
+    COALESCE(SUM(bet_black_count), 0) AS black,
     COALESCE(MAX(CASE WHEN (payout - total_bet) > 0 THEN (payout - total_bet) ELSE NULL END), 0) AS highest_win,
     COALESCE(MIN(CASE WHEN (payout - total_bet) < 0 THEN (payout - total_bet) ELSE NULL END), 0) AS highest_loss
 FROM roulette_games

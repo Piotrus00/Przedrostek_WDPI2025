@@ -158,8 +158,8 @@ INSERT INTO upgrades (id, title, description, base_cost, max_level) VALUES
     (1, 'Additional 7', '2x 7 chances', 20, 5),
     (2, 'Black Multiplier', '+0.2x multiplier', 100, 5),
     (3, 'Red Multiplier', '+0.2x multiplier', 100, 5),
-    (4, 'Green Multiplier', '+1 multiplier', 100, 5),
-    (5, 'Lucky Green', '2x green chance', 1, 10),
+    (4, 'Green Multiplier', '+1 multiplier', 200, 5),
+    (5, 'Lucky Green', '2x green chance', 300, 10),
     (6, 'Refund', '1% refund chance', 250, 7),
     (7, 'More Money2', '+0.1x more money', 500, 10);
 

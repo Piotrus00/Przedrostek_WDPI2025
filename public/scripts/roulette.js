@@ -195,8 +195,11 @@ const initRoulette = () => {
         //drobne opoznienie przed animacja
 		setTimeout(() => {
 			const numberWidth = 54; //szerokosc pojedynczej liczby na kole
-			const repetitions = 4; //ile razy powtarzamy sekwencje liczb na kole
-			const winningIndexInLastSet = (repetitions - 2) * rouletteNumbers.length + randomIndex; //obliczamy index w ostatnim powtorzeniu
+			const repetitions = wheelEl.dataset.repetitions
+				? Number.parseInt(wheelEl.dataset.repetitions, 10)
+				: 5; //ile razy powtarzamy sekwencje liczb na kole
+			const safeRepetitions = Number.isFinite(repetitions) && repetitions > 2 ? repetitions : 5;
+			const winningIndexInLastSet = (safeRepetitions - 2) * rouletteNumbers.length + randomIndex; //obliczamy index w ostatnim powtorzeniu
 
             //obliczamy przesuniecie kola tak aby wylosowana liczba znalazla sie na srodku
 			const containerWidth = wheelEl.parentElement ? wheelEl.parentElement.offsetWidth : wheelEl.offsetWidth;

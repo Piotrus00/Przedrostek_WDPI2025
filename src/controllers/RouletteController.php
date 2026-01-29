@@ -89,6 +89,39 @@ class RouletteController extends AppController
 				$randomIndex = $spin['index']; // indeks wylosowanego numeru
 				$payout = RouletteGameService::calculateWinnings($bets, $result, $upgradeLevels, $totalBet); // obliczenie wygranej
 
+				$betRedCount = 0;
+				$betBlackCount = 0;
+				$betGreenCount = 0;
+				$redNumbers = RouletteGameService::getRedNumbers();
+				foreach ($bets as $bet) {
+					if (!is_array($bet)) {
+						continue;
+					}
+					$betValue = $bet['number'] ?? null;
+					if ($betValue === 'red') {
+						$betRedCount++;
+						continue;
+					}
+					if ($betValue === 'black') {
+						$betBlackCount++;
+						continue;
+					}
+					if ($betValue === 0 || $betValue === '0') {
+						$betGreenCount++;
+						continue;
+					}
+					if (is_numeric($betValue)) {
+						$betNumber = (int) $betValue;
+						if ($betNumber === 0) {
+							$betGreenCount++;
+						} elseif (in_array($betNumber, $redNumbers, true)) {
+							$betRedCount++;
+						} else {
+							$betBlackCount++;
+						}
+					}
+				}
+
 				$newBalance = $currentBalance - $totalBet + $payout; // aktualizacja salda
 				UserDefinition::updateBalance((int) $userId, $newBalance); // zapis salda do bazy danych
 				$_SESSION['user_balance'] = $newBalance; // aktualizacja salda w sesji
@@ -100,6 +133,9 @@ class RouletteController extends AppController
 					(int) $userId,
 					$totalBet,
 					$payout,
+					$betRedCount,
+					$betBlackCount,
+					$betGreenCount,
 					$resultNumber,
 					$resultColor
 				);

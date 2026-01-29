@@ -4,7 +4,7 @@ require_once 'Repository.php';
 
 class EarningsRepository extends Repository
 {
-    public function applyDailyEarning(int $userId, int $amount = 500, int $hours = 24): ?int
+    public function applyDailyEarning(int $userId, int $amount = 200, int $hours = 24): ?int
     {
         $connection = $this->database->connect();
         try {
